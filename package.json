@@ -1,18 +1,22 @@
 {
-  "name": "legacy-android-controller",
-  "version": "1.0.0",
-  "description": "Browser-based ADB screen controller for legacy Android devices (Android 4.2.2+)",
+  "name": "mobicraft",
+  "version": "2.0.0",
+  "description": "Minimalist, responsive Android screen controller supporting both legacy devices (ADB screencap) and modern devices (scrcpy)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "build": "npm --prefix frontend run build",
+    "dev:backend": "node --watch server.js",
+    "dev:frontend": "npm --prefix frontend run dev"
   },
   "keywords": [
     "android",
     "adb",
+    "scrcpy",
     "screen-mirror",
-    "legacy-android",
-    "controller"
+    "controller",
+    "react",
+    "tailwindcss"
   ],
   "author": "",
   "license": "MIT",

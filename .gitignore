@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
 
+# Local Database data
+backend/data/*.json
+!backend/data/.gitkeep
+
 # Logs
 logs/
 *.log
