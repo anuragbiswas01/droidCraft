@@ -1,0 +1,22 @@
+{
+  "name": "legacy-android-controller",
+  "version": "1.0.0",
+  "description": "Browser-based ADB screen controller for legacy Android devices (Android 4.2.2+)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "android",
+    "adb",
+    "screen-mirror",
+    "legacy-android",
+    "controller"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

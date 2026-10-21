@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legacy Android 4.2.2 Screen Controller</title>
+  <meta name="description" content="Local browser-based screen mirror and touch controller for legacy Android 4.2.2 devices over USB ADB.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2.2">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header Navigation -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>mobiCraft Controller</h1>
+          <span class="badge-tag">Android 4.2.2 Legacy</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Device Selector -->
+        <div class="device-select-wrapper">
+          <label for="device-select" class="visually-hidden">Connected Device</label>
+          <div class="status-indicator-dot" id="status-indicator"></div>
+          <select id="device-select" class="custom-select" title="Select Connected Android Device">
+            <option value="">Searching devices...</option>
+          </select>
+          <button id="btn-rescan-devices" class="icon-button" title="Rescan ADB Devices" aria-label="Rescan Devices">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Refresh rate control -->
+        <div class="refresh-controls-group">
+          <button id="btn-toggle-polling" class="btn-toggle active" title="Toggle automatic screen refresh">
+            <span class="icon" id="toggle-polling-icon">⏸</span>
+            <span id="toggle-polling-label">Live</span>
+          </button>
+
+          <select id="select-interval" class="custom-select interval-select" title="Screenshot refresh interval">
+            <option value="500">Fast (500ms)</option>
+            <option value="1000" selected>Balanced (1000ms)</option>
+            <option value="2000">Slow (2000ms)</option>
+            <option value="5000">Saver (5000ms)</option>
+          </select>
+
+          <button id="btn-manual-refresh" class="btn-primary-ghost" title="Refresh Screen Snapshot Now" aria-label="Refresh Now">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- LAN Access Button -->
+        <button id="btn-lan-share" class="lan-share-btn" title="Click to copy local network (Wi-Fi) URL to open on other devices" aria-label="Local Network Share">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+          <span id="lan-share-label">LAN: Loading...</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="btn-open-settings" class="icon-button" title="Controller Settings & ADB Path" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Controller Canvas Area -->
+    <main class="main-workspace">
+      <!-- Left / Center: Interactive Phone Stage -->
+      <section class="screen-stage-container">
+        <!-- Error notification banner -->
+        <div id="error-banner" class="alert-banner hidden" role="alert">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-message" id="error-banner-text">Device communication error. Retaining last known frame.</div>
+          <button id="btn-dismiss-error" class="alert-dismiss" aria-label="Dismiss alert">&times;</button>
+        </div>
+
+        <!-- Phone Mockup Frame -->
+        <div class="phone-frame">
+          <div class="phone-top-speaker"></div>
+          <div class="phone-front-camera"></div>
+
+          <!-- Display viewport -->
+          <div class="display-viewport" id="viewport-container">
+            <!-- Loading & Empty States -->
+            <div id="screen-loading-overlay" class="viewport-overlay hidden">
+              <div class="spinner"></div>
+              <p>Connecting to ADB Screencap...</p>
+            </div>
+
+            <div id="screen-placeholder" class="viewport-overlay">
+              <div class="placeholder-icon">📱</div>
+              <h3>No Display Signal</h3>
+              <p>Select an authorized device above to start mirroring.</p>
+            </div>
+
+            <!-- Screen Image -->
+            <img id="screen-image" class="device-screen-img" alt="Android Screen Mirror" draggable="false">
+
+            <!-- Interactive Feedback Overlay Layer (Tap ripples, Swipe arrows) -->
+            <div id="interaction-overlay" class="interaction-layer"></div>
+
+            <!-- Scroll HUD floating badge -->
+            <div id="scroll-hud" class="scroll-hud hidden">
+              <span id="scroll-hud-text">Scroll ⬇️</span>
+            </div>
+          </div>
+
+          <!-- Physical / Soft Button Bar beneath phone screen -->
+          <div class="phone-bottom-bar">
+            <button id="btn-soft-menu" class="phone-key" title="Menu (Keycode 82)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+              </svg>
+              <span>MENU</span>
+            </button>
+            <button id="btn-soft-home" class="phone-key phone-key-home" title="Home (Keycode 3)">
+              <div class="home-icon-circle"></div>
+              <span>HOME</span>
+            </button>
+            <button id="btn-soft-back" class="phone-key" title="Back (Keycode 4)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+              </svg>
+              <span>BACK</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Metrics / Status Strip -->
+        <div class="screen-metrics-bar">
+          <div class="metric-item">
+            <span class="metric-label">Resolution:</span>
+            <span class="metric-value" id="val-resolution">-- x --</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Capture:</span>
+            <span class="metric-value" id="val-latency">-- ms</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Freshness:</span>
+            <span class="metric-value" id="val-updated">--</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Status:</span>
+            <span class="metric-value status-badge" id="val-stream-status">Idle</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Remote Control Console -->
+      <aside class="control-panel">
+        <!-- Device Info Card -->
+        <div class="glass-card device-info-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            Device Details
+          </h2>
+          <div class="info-grid">
+            <div class="info-cell">
+              <span class="info-key">Device</span>
+              <span class="info-val" id="info-device-name">--</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-key">OS Version</span>
+              <span class="info-val" id="info-os-version">Android 4.2.2</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-key">Serial</span>
+              <span class="info-val" id="info-serial">--</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-key">Storage Path</span>
+              <span class="info-val font-mono">/data/local/tmp</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swipe & Scroll Gestures Card -->
+        <div class="glass-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="7 13 12 18 17 13"></polyline>
+              <polyline points="7 6 12 11 17 6"></polyline>
+            </svg>
+            Swipe & Scroll Controls
+          </h2>
+          <div class="gesture-control-grid">
+            <!-- 4-Way Swipe Pad -->
+            <div class="dpad-container">
+              <div class="dpad-row dpad-center">
+                <button id="btn-swipe-up" class="gesture-btn dpad-btn" title="Swipe Up (Drag finger upwards)">
+                  <span class="btn-icon">▲</span>
+                  <span class="btn-label">Swipe Up</span>
+                </button>
+              </div>
+              <div class="dpad-row dpad-middle">
+                <button id="btn-swipe-left" class="gesture-btn dpad-btn" title="Swipe Left (Drag finger left)">
+                  <span class="btn-icon">◀</span>
+                  <span class="btn-label">Swipe Left</span>
+                </button>
+                <div class="dpad-core" title="Mouse wheel over phone screen to scroll">
+                  <span>🖱️</span>
+                  <small>SCROLL</small>
+                </div>
+                <button id="btn-swipe-right" class="gesture-btn dpad-btn" title="Swipe Right (Drag finger right)">
+                  <span class="btn-icon">▶</span>
+                  <span class="btn-label">Swipe Right</span>
+                </button>
+              </div>
+              <div class="dpad-row dpad-center">
+                <button id="btn-swipe-down" class="gesture-btn dpad-btn" title="Swipe Down (Drag finger downwards)">
+                  <span class="btn-icon">▼</span>
+                  <span class="btn-label">Swipe Down</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Scroll Actions -->
+            <div class="scroll-actions-column">
+              <button id="btn-scroll-down" class="gesture-btn action-btn-accent" title="Scroll Down (Move content up)">
+                <span class="btn-icon">📜 ⬇️</span>
+                <span class="btn-label">Scroll Down</span>
+              </button>
+              <button id="btn-scroll-up" class="gesture-btn action-btn-accent" title="Scroll Up (Move content down)">
+                <span class="btn-icon">📜 ⬆️</span>
+                <span class="btn-label">Scroll Up</span>
+              </button>
+              <button id="btn-page-down" class="gesture-btn" title="Page Down (Keyevent 93)">
+                <span class="btn-icon">📄 ⬇️</span>
+                <span class="btn-label">Page Down</span>
+              </button>
+              <button id="btn-page-up" class="gesture-btn" title="Page Up (Keyevent 92)">
+                <span class="btn-icon">📄 ⬆️</span>
+                <span class="btn-label">Page Up</span>
+              </button>
+            </div>
+          </div>
+          <p class="action-hint">💡 <em>Scroll your mouse wheel or touchpad directly on the phone display to scroll smoothly!</em></p>
+        </div>
+
+        <!-- Hardware Keypad Controls -->
+        <div class="glass-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="6" y1="8" x2="6" y2="8"></line>
+              <line x1="10" y1="8" x2="10" y2="8"></line>
+              <line x1="14" y1="8" x2="14" y2="8"></line>
+              <line x1="18" y1="8" x2="18" y2="8"></line>
+              <line x1="6" y1="12" x2="6" y2="12"></line>
+              <line x1="18" y1="12" x2="18" y2="12"></line>
+              <line x1="10" y1="16" x2="14" y2="16"></line>
+            </svg>
+            System Navigation
+          </h2>
+          <div class="action-grid-buttons">
+            <button id="btn-action-wake" class="action-btn btn-wake" title="Send Keyevent 224 (Wake Screen)">
+              <span class="btn-icon">☀️</span>
+              <span class="btn-label">Wake Up</span>
+            </button>
+
+            <button id="btn-action-power" class="action-btn btn-power" title="Warning: Toggles screen power (Keyevent 26)">
+              <span class="btn-icon">⏻</span>
+              <span class="btn-label">Power Key</span>
+            </button>
+
+            <button id="btn-action-home" class="action-btn" title="Home (Keyevent 3)">
+              <span class="btn-icon">🏠</span>
+              <span class="btn-label">Home</span>
+            </button>
+
+            <button id="btn-action-back" class="action-btn" title="Back (Keyevent 4)">
+              <span class="btn-icon">↩</span>
+              <span class="btn-label">Back</span>
+            </button>
+
+            <button id="btn-action-menu" class="action-btn" title="Menu (Keyevent 82)">
+              <span class="btn-icon">☰</span>
+              <span class="btn-label">Menu</span>
+            </button>
+
+            <button id="btn-action-volup" class="action-btn" title="Volume Up (Keyevent 24)">
+              <span class="btn-icon">🔊</span>
+              <span class="btn-label">Vol +</span>
+            </button>
+
+            <button id="btn-action-voldown" class="action-btn" title="Volume Down (Keyevent 25)">
+              <span class="btn-icon">🔉</span>
+              <span class="btn-label">Vol -</span>
+            </button>
+
+            <button id="btn-action-enter" class="action-btn" title="Enter / OK (Keyevent 66)">
+              <span class="btn-icon">⏎</span>
+              <span class="btn-label">Enter</span>
+            </button>
+
+            <button id="btn-action-notifications" class="action-btn" title="Expand Notification Shade (service call statusbar 1)">
+              <span class="btn-icon">🔔</span>
+              <span class="btn-label">Notice</span>
+            </button>
+
+            <button id="btn-action-close-notifications" class="action-btn" title="Collapse Notification Shade (service call statusbar 2)">
+              <span class="btn-icon">🔕</span>
+              <span class="btn-label">Dismiss</span>
+            </button>
+          </div>
+          <p class="action-hint">💡 <em>Click or drag directly on the phone display to tap and swipe.</em></p>
+        </div>
+
+        <!-- Text Input & Keyboard Tools -->
+        <div class="glass-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 7 4 4 20 4 20 7"></polyline>
+              <line x1="9" y1="20" x2="15" y2="20"></line>
+              <line x1="12" y1="4" x2="12" y2="20"></line>
+            </svg>
+            Remote Text Input
+          </h2>
+          <form id="form-send-text" class="text-input-form" onsubmit="return false;">
+            <div class="input-row">
+              <input type="text" id="input-text-payload" class="text-field" placeholder="Type text to send to phone..." autocomplete="off">
+              <button type="submit" id="btn-send-text" class="btn-send">Send</button>
+            </div>
+            <div class="keyboard-aux-buttons">
+              <button type="button" id="btn-key-backspace" class="btn-pill" title="Send Backspace (Keyevent 67)">⌫ Backspace</button>
+              <button type="button" id="btn-key-enter-form" class="btn-pill" title="Send Enter (Keyevent 66)">⏎ Enter</button>
+              <button type="button" id="btn-clear-text" class="btn-pill btn-pill-subtle" title="Clear input field">Clear</button>
+            </div>
+            <p class="field-hint">Android 4.2.2 replaces spaces with <code>%s</code>. Characters supported: alphanumeric, spaces, and <code>._-/@:=+?</code>.</p>
+          </form>
+        </div>
+
+        <!-- Activity Log & Feedback Box -->
+        <div class="glass-card activity-log-card">
+          <div class="card-header-flex">
+            <h2 class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Activity Log
+            </h2>
+            <button id="btn-clear-log" class="text-link-button">Clear</button>
+          </div>
+          <div id="log-output" class="log-stream">
+            <div class="log-entry info">[System] mobiCraft controller initialized.</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>ADB Configuration</h3>
+          <button id="btn-close-settings" class="modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <label for="input-adb-path" class="form-label">Custom ADB Executable Path:</label>
+          <input type="text" id="input-adb-path" class="text-field" placeholder="e.g. C:\platform-tools\adb.exe or adb">
+          <p class="field-hint">By default, <code>adb</code> from your Windows PATH is used. If not found, specify the full path to <code>adb.exe</code>.</p>
+
+          <div class="settings-meta-box">
+            <h4>🌐 Local Network Access (Wi-Fi / LAN):</h4>
+            <p style="margin-bottom: 6px; font-size: 0.82rem;">Access mobiCraft from other phones, tablets, or laptops on your Wi-Fi:</p>
+            <div class="lan-share-box">
+              <input type="text" id="input-lan-url" class="text-field readonly-field" readonly value="http://localhost:3000">
+              <button id="btn-copy-lan-url" class="btn-secondary" type="button" style="white-space: nowrap;">Copy URL</button>
+            </div>
+            <p class="field-hint" style="margin-top: 6px;">Note: Ensure Windows Defender Firewall allows Node.js on Private networks if devices cannot connect.</p>
+          </div>
+
+          <div class="settings-meta-box">
+            <h4>Target Device Architecture:</h4>
+            <ul>
+              <li>OS: Android 4.2.2 (API level 17)</li>
+              <li>Staging directory: <code>/data/local/tmp</code> (verified writable)</li>
+              <li>Screencap mode: File staging + adb pull (exec-out unsupported on 4.2.2)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-cancel-settings" class="btn-secondary">Cancel</button>
+          <button id="btn-save-settings" class="btn-primary">Save & Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Power Confirmation Modal -->
+    <div id="power-confirm-modal" class="modal-backdrop hidden">
+      <div class="modal-card modal-warning">
+        <div class="modal-header">
+          <h3 class="warning-title">⚠️ Power Button Notice</h3>
+          <button id="btn-close-power-modal" class="modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Sending <strong>Keyevent 26</strong> toggles the phone's power state.</p>
+          <p>If the screen is currently on, this may <strong>turn off the display</strong> and cause the mirror to go black.</p>
+          <p>If your device is sleeping, use <strong>Wake Up</strong> (Keyevent 224) first. Do you still want to send the Power key toggle?</p>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-cancel-power" class="btn-secondary">Cancel</button>
+          <button id="btn-confirm-power" class="btn-danger">Send Power Toggle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2.2"></script>
+</body>
+</html>
