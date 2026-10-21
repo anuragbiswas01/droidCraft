@@ -80,9 +80,8 @@ app.post('/api/adb-path', async (req, res) => {
   }
 });
 
-// Static frontend serving: checks frontend/dist first (React build), then public/
+// Static frontend serving: serves compiled React bundle from frontend/dist
 const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
-const legacyPublicPath = path.join(__dirname, '..', 'public');
 
 if (require('fs').existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
@@ -90,8 +89,6 @@ if (require('fs').existsSync(frontendDistPath)) {
     if (req.path.startsWith('/api')) return next();
     res.sendFile(path.join(frontendDistPath, 'index.html'));
   });
-} else {
-  app.use(express.static(legacyPublicPath));
 }
 
 // Error handling
