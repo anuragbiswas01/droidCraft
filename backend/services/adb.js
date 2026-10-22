@@ -286,7 +286,6 @@ class AdbService {
         }
 
         const deltaY = y2 - y1;
-        const deltaX = x2 - x1;
 
         // Downward drag from top edge (y <= 48) -> open notification shade
         if (y1 <= 48 && deltaY > 30) {
@@ -297,38 +296,31 @@ class AdbService {
           } catch (_) {}
         }
 
-        // Upward swipe -> close notification shade
-        if (deltaY < -60) {
-          try {
-            await this.execAdb(['-s', serial, 'shell', 'service', 'call', 'statusbar', '2']);
-          } catch (_) {}
-        }
+        // Clamp coordinates to valid device display dimensions
+        const res = this.deviceResolutions.get(serial) || { width: 480, height: 800 };
+        const maxW = res.width || 480;
+        const maxH = res.height || 800;
 
-        // Clamp distance to avoid Android 4.2.2 50ms fling bug
-        const MAX_SWIPE_DIST = 220;
-        let finalX2 = x2;
-        let finalY2 = y2;
-        let finalY1 = y1;
+        const clampX1 = Math.max(0, Math.min(maxW, x1));
+        const clampY1 = Math.max(0, Math.min(maxH, y1));
+        const clampX2 = Math.max(0, Math.min(maxW, x2));
+        const clampY2 = Math.max(0, Math.min(maxH, y2));
 
-        if (y1 < 54 && deltaY > 0) {
-          finalY1 = 54;
-          finalY2 = Math.min(54 + deltaY, 54 + MAX_SWIPE_DIST);
-        } else {
-          if (Math.abs(deltaY) > MAX_SWIPE_DIST) {
-            finalY2 = Math.round(y1 + Math.sign(deltaY) * MAX_SWIPE_DIST);
-          }
-          if (Math.abs(deltaX) > MAX_SWIPE_DIST) {
-            finalX2 = Math.round(x1 + Math.sign(deltaX) * MAX_SWIPE_DIST);
-          }
-        }
-
-        await this.execAdb([
+        const devInfo = this.deviceInfoCache.get(serial);
+        const swipeArgs = [
           '-s', serial, 'shell', 'input', 'swipe',
-          String(x1), String(finalY1), String(finalX2), String(finalY2)
-        ]);
+          String(clampX1), String(clampY1), String(clampX2), String(clampY2)
+        ];
 
-        db.addLog({ type: 'info', serial, message: `Swipe (${x1},${finalY1}) -> (${finalX2},${finalY2})` });
-        return { success: true, action: 'swipe', x1, y1: finalY1, x2: finalX2, y2: finalY2 };
+        // Android 4.4+ (API >= 19) supports an optional duration in ms
+        if (devInfo && devInfo.apiLevel >= 19) {
+          swipeArgs.push('300');
+        }
+
+        await this.execAdb(swipeArgs);
+
+        db.addLog({ type: 'info', serial, message: `Swipe (${clampX1},${clampY1}) -> (${clampX2},${clampY2})` });
+        return { success: true, action: 'swipe', x1: clampX1, y1: clampY1, x2: clampX2, y2: clampY2 };
       }
 
       case 'scroll': {
@@ -336,27 +328,33 @@ class AdbService {
         const res = this.deviceResolutions.get(serial) || { width: 480, height: 800 };
         const midX = Math.round(res.width / 2);
         const midY = Math.round(res.height / 2);
-        const step = 128;
+        const step = Math.round(Math.min(res.width, res.height) * 0.35);
 
         let x1 = midX, y1 = midY, x2 = midX, y2 = midY;
         if (direction === 'down') {
-          y1 = midY + 40;
+          y1 = midY + Math.round(step / 2);
           y2 = y1 - step;
         } else if (direction === 'up') {
-          y1 = midY - 40;
+          y1 = midY - Math.round(step / 2);
           y2 = y1 + step;
         } else if (direction === 'right') {
-          x1 = midX + 40;
+          x1 = midX + Math.round(step / 2);
           x2 = x1 - step;
         } else if (direction === 'left') {
-          x1 = midX - 40;
+          x1 = midX - Math.round(step / 2);
           x2 = x1 + step;
         }
 
-        await this.execAdb([
+        const devInfo = this.deviceInfoCache.get(serial);
+        const scrollArgs = [
           '-s', serial, 'shell', 'input', 'swipe',
           String(x1), String(y1), String(x2), String(y2)
-        ]);
+        ];
+        if (devInfo && devInfo.apiLevel >= 19) {
+          scrollArgs.push('250');
+        }
+
+        await this.execAdb(scrollArgs);
 
         db.addLog({ type: 'info', serial, message: `Scroll ${direction}` });
         return { success: true, action: 'scroll', direction };

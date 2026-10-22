@@ -65,18 +65,22 @@ mobiCraft/
 ## 🚀 Quick Start Guide
 
 ### 1. Verify ADB & Scrcpy
+
 Open PowerShell and verify:
+
 ```powershell
 adb devices
 scrcpy --version
 ```
 
 ### 2. Start mobiCraft
+
 ```powershell
 npm start
 ```
 
 Startup banner:
+
 ```text
 ===================================================
  mobiCraft Backend Service (Express + Local DB)
@@ -87,6 +91,7 @@ Startup banner:
 ```
 
 ### 3. Open in Browser
+
 - **On PC:** Open `http://localhost:3000`
 - **On another phone / tablet:** Open `http://192.168.29.73:3000`
 
@@ -94,9 +99,9 @@ Startup banner:
 
 ## 🛠️ Development Scripts
 
-| Command | Description |
-|---|---|
-| `npm start` | Starts Express server serving pre-built React frontend on port 3000 |
-| `npm run build` | Builds the React frontend into `frontend/dist` |
-| `npm run dev:frontend` | Starts Vite development server with hot-module reload on port 5173 |
-| `npm run dev:backend` | Starts backend with `--watch` reload on port 3000 |
+| Command                | Description                                                         |
+| ---------------------- | ------------------------------------------------------------------- |
+| `npm start`            | Starts Express server serving pre-built React frontend on port 3000 |
+| `npm run build`        | Builds the React frontend into `frontend/dist`                      |
+| `npm run dev:frontend` | Starts Vite development server with hot-module reload on port 5173  |
+| `npm run dev:backend`  | Starts backend with `--watch` reload on port 3000                   |

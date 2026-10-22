@@ -39,6 +39,13 @@ export default function SidebarControls() {
   const [textInput, setTextInput] = useState('');
   const [showPowerConfirm, setShowPowerConfirm] = useState(false);
 
+  const screenW = deviceInfo?.screenWidth || 480;
+  const screenH = deviceInfo?.screenHeight || 800;
+  const midX = Math.round(screenW / 2);
+  const midY = Math.round(screenH / 2);
+  const swipeDeltaX = Math.round(screenW * 0.35); // 35% of screen width
+  const swipeDeltaY = Math.round(screenH * 0.25); // 25% of screen height
+
   const handleSendText = async (e) => {
     e.preventDefault();
     if (!textInput.trim()) return;
@@ -109,7 +116,7 @@ export default function SidebarControls() {
         <div className="grid grid-cols-3 gap-1.5 max-w-[200px] mx-auto">
           <div />
           <button
-            onClick={() => sendAction({ action: 'swipe', x1: 240, y1: 450, x2: 240, y2: 300 }, 'Swipe Up')}
+            onClick={() => sendAction({ action: 'swipe', x1: midX, y1: midY + swipeDeltaY, x2: midX, y2: midY - swipeDeltaY }, 'Swipe Up')}
             className="flex items-center justify-center p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
             title="Swipe Up"
           >
@@ -118,21 +125,21 @@ export default function SidebarControls() {
           <div />
 
           <button
-            onClick={() => sendAction({ action: 'swipe', x1: 350, y1: 400, x2: 150, y2: 400 }, 'Swipe Left')}
+            onClick={() => sendAction({ action: 'swipe', x1: midX + swipeDeltaX, y1: midY, x2: midX - swipeDeltaX, y2: midY }, 'Swipe Left')}
             className="flex items-center justify-center p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
             title="Swipe Left"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <button
-            onClick={() => sendAction({ action: 'tap', x: 240, y: 400 }, 'Center Tap')}
+            onClick={() => sendAction({ action: 'tap', x: midX, y: midY }, 'Center Tap')}
             className="flex items-center justify-center p-2 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition"
             title="Center Tap"
           >
             <Circle className="w-3 h-3 fill-current" />
           </button>
           <button
-            onClick={() => sendAction({ action: 'swipe', x1: 150, y1: 400, x2: 350, y2: 400 }, 'Swipe Right')}
+            onClick={() => sendAction({ action: 'swipe', x1: midX - swipeDeltaX, y1: midY, x2: midX + swipeDeltaX, y2: midY }, 'Swipe Right')}
             className="flex items-center justify-center p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
             title="Swipe Right"
           >
@@ -141,7 +148,7 @@ export default function SidebarControls() {
 
           <div />
           <button
-            onClick={() => sendAction({ action: 'swipe', x1: 240, y1: 300, x2: 240, y2: 450 }, 'Swipe Down')}
+            onClick={() => sendAction({ action: 'swipe', x1: midX, y1: midY - swipeDeltaY, x2: midX, y2: midY + swipeDeltaY }, 'Swipe Down')}
             className="flex items-center justify-center p-2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
             title="Swipe Down"
           >

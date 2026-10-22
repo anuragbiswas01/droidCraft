@@ -16,70 +16,86 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
 
   const containerRef = useRef(null);
   const imgRef = useRef(null);
+  const [imgNaturalSize, setImgNaturalSize] = useState(null);
   const [touchIndicator, setTouchIndicator] = useState(null); // { x, y }
   const [swipeIndicator, setSwipeIndicator] = useState(null); // { x1, y1, x2, y2 }
   const [scrollHud, setScrollHud] = useState(null);
 
   const pointerStartRef = useRef(null);
-  const isPointerDownRef = useRef(false);
+  const isPointerActiveRef = useRef(false);
   const scrollDebounceRef = useRef(null);
 
   // Compute exact native device coordinates from browser viewport event
-  const getDeviceCoords = useCallback((e) => {
+  const getDeviceCoords = useCallback((e, requireInside = false) => {
     const img = imgRef.current;
-    if (!img || !deviceInfo) return null;
+    if (!img) return null;
 
     const rect = img.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+
     const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
     const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY);
 
     if (clientX === undefined || clientY === undefined) return null;
 
-    // Check if within image rect
-    if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
-      return null;
+    // For pointer down, strictly require clicking inside the phone screen
+    if (requireInside) {
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+        return null;
+      }
     }
 
+    // Relative to the image element
     const clickX = clientX - rect.left;
     const clickY = clientY - rect.top;
 
-    const nativeW = deviceInfo.screenWidth || 480;
-    const nativeH = deviceInfo.screenHeight || 800;
+    const currentW = img.naturalWidth || deviceInfo?.screenWidth || 480;
+    const currentH = img.naturalHeight || deviceInfo?.screenHeight || 800;
 
-    const scaleX = nativeW / rect.width;
-    const scaleY = nativeH / rect.height;
+    const scaleX = currentW / rect.width;
+    const scaleY = currentH / rect.height;
 
-    const deviceX = Math.max(0, Math.min(nativeW, Math.round(clickX * scaleX)));
-    const deviceY = Math.max(0, Math.min(nativeH, Math.round(clickY * scaleY)));
+    // Clamp coordinates to device screen resolution
+    const deviceX = Math.max(0, Math.min(currentW, Math.round(clickX * scaleX)));
+    const deviceY = Math.max(0, Math.min(currentH, Math.round(clickY * scaleY)));
+
+    // Viewport coordinates relative to image rect for overlay indicators
+    const viewportX = Math.max(0, Math.min(rect.width, clickX));
+    const viewportY = Math.max(0, Math.min(rect.height, clickY));
 
     return {
       deviceX,
       deviceY,
-      viewportX: clientX - rect.left,
-      viewportY: clientY - rect.top
+      viewportX,
+      viewportY
     };
   }, [deviceInfo]);
 
   // Pointer Down
   const handlePointerDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return; // Left click only
-    const coords = getDeviceCoords(e);
+    const coords = getDeviceCoords(e, true);
     if (!coords) return;
 
-    isPointerDownRef.current = true;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
+
+    isPointerActiveRef.current = true;
     pointerStartRef.current = {
       deviceX: coords.deviceX,
       deviceY: coords.deviceY,
       viewportX: coords.viewportX,
       viewportY: coords.viewportY,
+      pointerId: e.pointerId,
       startTime: Date.now()
     };
   };
 
   // Pointer Move
   const handlePointerMove = (e) => {
-    if (!isPointerDownRef.current || !pointerStartRef.current) return;
-    const coords = getDeviceCoords(e);
+    if (!isPointerActiveRef.current || !pointerStartRef.current) return;
+    const coords = getDeviceCoords(e, false);
     if (!coords) return;
 
     setSwipeIndicator({
@@ -92,14 +108,20 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
 
   // Pointer Up
   const handlePointerUp = async (e) => {
-    if (!isPointerDownRef.current || !pointerStartRef.current) return;
-    isPointerDownRef.current = false;
+    if (!isPointerActiveRef.current || !pointerStartRef.current) return;
+    isPointerActiveRef.current = false;
     setSwipeIndicator(null);
 
     const start = pointerStartRef.current;
     pointerStartRef.current = null;
 
-    const coords = getDeviceCoords(e) || { deviceX: start.deviceX, deviceY: start.deviceY };
+    if (start.pointerId !== undefined) {
+      try {
+        e.currentTarget.releasePointerCapture(start.pointerId);
+      } catch (_) {}
+    }
+
+    const coords = getDeviceCoords(e, false) || { deviceX: start.deviceX, deviceY: start.deviceY };
     const dx = coords.deviceX - start.deviceX;
     const dy = coords.deviceY - start.deviceY;
     const dist = Math.hypot(dx, dy);
@@ -150,8 +172,8 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
     sendAction({ action: 'scroll', direction }, `Scroll ${direction}`).catch(() => {});
   };
 
-  const nativeW = deviceInfo?.screenWidth || 480;
-  const nativeH = deviceInfo?.screenHeight || 800;
+  const nativeW = imgNaturalSize?.width || deviceInfo?.screenWidth || 480;
+  const nativeH = imgNaturalSize?.height || deviceInfo?.screenHeight || 800;
   const aspectRatio = nativeW / nativeH;
 
   return (
@@ -181,49 +203,62 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
       >
         {screenBlobUrl ? (
           <div 
-            className="relative w-full h-full flex items-center justify-center cursor-crosshair touch-none"
+            className="relative w-full h-full flex items-center justify-center cursor-crosshair touch-none select-none"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
           >
-            <img
-              ref={imgRef}
-              src={screenBlobUrl}
-              alt="Android Screen"
-              draggable="false"
-              className="max-w-full max-h-full object-contain pointer-events-none prevent-select"
+            {/* Phone Display Box - exactly envelopes the phone display */}
+            <div 
+              className="relative max-w-full max-h-full flex items-center justify-center"
               style={{ aspectRatio: `${aspectRatio}` }}
-            />
-
-            {/* Tap Ripple Indicator */}
-            {touchIndicator && (
-              <div 
-                className="absolute w-8 h-8 rounded-full border-2 border-cyan-400 bg-cyan-400/20 pointer-events-none animate-ping transform -translate-x-1/2 -translate-y-1/2"
-                style={{ left: touchIndicator.x, top: touchIndicator.y }}
+            >
+              <img
+                ref={imgRef}
+                src={screenBlobUrl}
+                alt="Android Screen"
+                draggable="false"
+                onLoad={(e) => {
+                  if (e.target.naturalWidth && e.target.naturalHeight) {
+                    setImgNaturalSize({
+                      width: e.target.naturalWidth,
+                      height: e.target.naturalHeight
+                    });
+                  }
+                }}
+                className="w-full h-full object-contain pointer-events-none prevent-select"
               />
-            )}
 
-            {/* Swipe Trajectory Line Indicator */}
-            {swipeIndicator && (
-              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                <line
-                  x1={swipeIndicator.x1}
-                  y1={swipeIndicator.y1}
-                  x2={swipeIndicator.x2}
-                  y2={swipeIndicator.y2}
-                  stroke="#38bdf8"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray="4 4"
+              {/* Tap Ripple Indicator */}
+              {touchIndicator && (
+                <div 
+                  className="absolute w-8 h-8 rounded-full border-2 border-cyan-400 bg-cyan-400/20 pointer-events-none animate-ping transform -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: touchIndicator.x, top: touchIndicator.y }}
                 />
-                <circle cx={swipeIndicator.x2} cy={swipeIndicator.y2} r="5" fill="#38bdf8" />
-              </svg>
-            )}
+              )}
+
+              {/* Swipe Trajectory Line Indicator */}
+              {swipeIndicator && (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
+                  <line
+                    x1={swipeIndicator.x1}
+                    y1={swipeIndicator.y1}
+                    x2={swipeIndicator.x2}
+                    y2={swipeIndicator.y2}
+                    stroke="#38bdf8"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="4 4"
+                  />
+                  <circle cx={swipeIndicator.x2} cy={swipeIndicator.y2} r="5" fill="#38bdf8" />
+                </svg>
+              )}
+            </div>
 
             {/* Scroll HUD */}
             {scrollHud && (
-              <div className="absolute top-6 px-3 py-1 bg-zinc-900/90 text-zinc-100 text-xs rounded-full border border-zinc-700 pointer-events-none shadow-md">
+              <div className="absolute top-6 px-3 py-1 bg-zinc-900/90 text-zinc-100 text-xs rounded-full border border-zinc-700 pointer-events-none shadow-md z-20">
                 {scrollHud}
               </div>
             )}
