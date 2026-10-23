@@ -71,7 +71,7 @@ export default function SettingsModal({ isOpen, onClose }) {
       <div className="relative z-10 w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden text-zinc-800 dark:text-zinc-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-800">
-          <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100">mobiCraft Settings</span>
+          <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100">DroidCraft Settings</span>
           <button onClick={onClose} className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">
             <X className="w-4 h-4" />
           </button>
@@ -86,7 +86,7 @@ export default function SettingsModal({ isOpen, onClose }) {
               <span>Local Network Access (Wi-Fi)</span>
             </div>
             <p className="text-zinc-500 text-[11px]">
-              Access mobiCraft from other smartphones, tablets, or computers on your Wi-Fi:
+              Access DroidCraft from other smartphones, tablets, or computers on your Wi-Fi:
             </p>
             {networkInfo?.networkUrls?.length > 0 ? (
               networkInfo.networkUrls.map(net => (

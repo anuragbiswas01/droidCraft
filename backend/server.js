@@ -104,7 +104,7 @@ app.use((err, req, res, next) => {
 const server = app.listen(port, host, () => {
   const netInfo = getNetworkInfo(port);
   console.log(`===================================================`);
-  console.log(` mobiCraft Backend Service (Express + Local DB)`);
+  console.log(` DroidCraft Backend Service (Express + Local DB)`);
   console.log(` -------------------------------------------------`);
   console.log(` > Local:   ${netInfo.localUrl}`);
   if (netInfo.networkUrls.length > 0) {

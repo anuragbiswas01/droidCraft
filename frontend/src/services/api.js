@@ -1,5 +1,5 @@
 /**
- * Centralized API service for mobiCraft
+ * Centralized API service for DroidCraft
  */
 
 const BASE_URL = '';

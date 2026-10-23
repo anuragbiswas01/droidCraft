@@ -195,8 +195,8 @@ class AdbService {
     this.captureLocks.set(serial, true);
     const startMs = Date.now();
     const tempId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-    const remoteTmpPath = `/data/local/tmp/mobicraft_${tempId}.png`;
-    const localTmpPath = path.join(os.tmpdir(), `mobicraft_${tempId}.png`);
+    const remoteTmpPath = `/data/local/tmp/droidcraft_${tempId}.png`;
+    const localTmpPath = path.join(os.tmpdir(), `droidcraft_${tempId}.png`);
 
     try {
       // 1. Capture to device tmp

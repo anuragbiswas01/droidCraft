@@ -1,5 +1,5 @@
 {
-  "name": "mobicraft",
+  "name": "droidcraft",
   "version": "2.0.0",
   "description": "Minimalist, responsive Android screen controller supporting both legacy devices (ADB screencap) and modern devices (scrcpy)",
   "main": "server.js",

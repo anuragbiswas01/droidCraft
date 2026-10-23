@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('mobicraft-theme');
+    const saved = localStorage.getItem('droidcraft-theme') || localStorage.getItem('mobicraft-theme');
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
@@ -16,7 +16,7 @@ export function ThemeProvider({ children }) {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('mobicraft-theme', theme);
+    localStorage.setItem('droidcraft-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

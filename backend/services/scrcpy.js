@@ -94,7 +94,7 @@ class ScrcpyService {
 
     const args = [
       '-s', serial,
-      '--window-title', `mobiCraft - ${serial}`,
+      '--window-title', `DroidCraft - ${serial}`,
       '--max-size', String(options.maxSize || settings.scrcpyMaxSize || 1024),
       '--video-bit-rate', String(options.bitrate || settings.scrcpyBitrate || '4M')
     ];

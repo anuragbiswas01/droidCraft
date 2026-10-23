@@ -51,7 +51,7 @@ export default function Header({ onOpenSettings }) {
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-2">
           <Smartphone className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-          <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 tracking-tight">mobiCraft</span>
+          <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 tracking-tight">DroidCraft</span>
         </div>
 
         {/* Device Select */}
