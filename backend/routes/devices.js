@@ -3,6 +3,29 @@ const router = express.Router();
 const adb = require('../services/adb');
 const scrcpy = require('../services/scrcpy');
 const db = require('../services/db');
+const packagesRouter = require('./packages');
+const memoryRouter = require('./memory');
+const processesRouter = require('./processes');
+
+// Subrouters for Package, Memory, and Process Management
+router.use('/:serial/packages', packagesRouter);
+router.use('/:serial/memory', memoryRouter);
+router.use('/:serial/processes', processesRouter);
+
+/**
+ * GET /api/devices/:serial/capabilities
+ * Direct capability facts
+ */
+router.get('/:serial/capabilities', async (req, res) => {
+  try {
+    const { serial } = req.params;
+    const forceRefresh = req.query.refresh === '1';
+    const caps = await adb.getDeviceCapabilities(serial, forceRefresh);
+    res.json({ success: true, capabilities: caps });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 /**
  * GET /api/devices

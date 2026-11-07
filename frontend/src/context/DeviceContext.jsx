@@ -11,6 +11,8 @@ export function DeviceProvider({ children }) {
   const [scrcpyVersion, setScrcpyVersion] = useState(null);
   const [scrcpySession, setScrcpySession] = useState(null);
   const [mode, setMode] = useState('auto'); // 'auto', 'scrcpy', 'legacy'
+  const [activeTab, setActiveTab] = useState('controller'); // 'controller' | 'packages'
+  const [capabilities, setCapabilities] = useState(null);
 
   const [isPolling, setIsPolling] = useState(true);
   const [pollingInterval, setPollingInterval] = useState(1000);
@@ -68,11 +70,29 @@ export function DeviceProvider({ children }) {
     }
   }, [selectedSerial, addLog]);
 
-  // Load detailed device info when selectedSerial changes
+  // Load detailed device info & capabilities when selectedSerial changes
+  const refreshCapabilities = useCallback(async (force = false) => {
+    if (!selectedSerial) {
+      setCapabilities(null);
+      return null;
+    }
+    try {
+      const data = await api.getDeviceCapabilities(selectedSerial, force);
+      if (data.capabilities) {
+        setCapabilities(data.capabilities);
+        return data.capabilities;
+      }
+    } catch (err) {
+      console.warn('Could not query device capabilities:', err.message);
+    }
+    return null;
+  }, [selectedSerial]);
+
   useEffect(() => {
     if (!selectedSerial) {
       setDeviceInfo(null);
       setScrcpySession(null);
+      setCapabilities(null);
       return;
     }
 
@@ -96,8 +116,10 @@ export function DeviceProvider({ children }) {
         addLog(`Could not query device info: ${err.message}`, 'warn');
       });
 
+    refreshCapabilities(false);
+
     return () => { isMounted = false; };
-  }, [selectedSerial, scrcpyAvailable, addLog]);
+  }, [selectedSerial, scrcpyAvailable, addLog, refreshCapabilities]);
 
   // Capture screen frame via legacy ADB
   const captureFrame = useCallback(async () => {
@@ -213,6 +235,11 @@ export function DeviceProvider({ children }) {
       scrcpySession,
       mode,
       setMode,
+      activeTab,
+      setActiveTab,
+      capabilities,
+      setCapabilities,
+      refreshCapabilities,
       isPolling,
       setIsPolling,
       pollingInterval,

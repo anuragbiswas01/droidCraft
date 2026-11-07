@@ -5,6 +5,7 @@ const devicesRouter = require('./routes/devices');
 const screenRouter = require('./routes/screen');
 const actionsRouter = require('./routes/actions');
 const scrcpyRouter = require('./routes/scrcpy');
+const jobManager = require('./services/jobManager');
 const adb = require('./services/adb');
 const db = require('./services/db');
 
@@ -35,6 +36,11 @@ app.use('/api/screen', screenRouter);
 app.use('/api/action', actionsRouter);
 app.use('/api/scrcpy', scrcpyRouter);
 app.use('/api/settings', settingsRouter);
+
+// Global Job Stream SSE Route
+app.get('/api/jobs/:jobId/stream', (req, res) => {
+  jobManager.subscribe(req.params.jobId, res);
+});
 
 // Legacy backward-compatibility routes
 app.get('/api/status', async (req, res) => {

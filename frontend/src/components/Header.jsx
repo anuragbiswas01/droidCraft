@@ -11,7 +11,9 @@ import {
   Settings, 
   Play, 
   Pause,
-  ExternalLink
+  ExternalLink,
+  Package,
+  Cpu
 } from 'lucide-react';
 
 export default function Header({ onOpenSettings }) {
@@ -27,7 +29,9 @@ export default function Header({ onOpenSettings }) {
     captureFrame,
     networkInfo,
     deviceInfo,
-    scrcpySession
+    scrcpySession,
+    activeTab,
+    setActiveTab
   } = useDevice();
 
   const { theme, toggleTheme } = useTheme();
@@ -93,6 +97,42 @@ export default function Header({ onOpenSettings }) {
             )}
           </div>
         )}
+        {/* View Switcher: Controller vs Packages */}
+        <div className="flex items-center space-x-1 ml-1 sm:ml-3 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <button
+            onClick={() => setActiveTab('controller')}
+            className={`flex items-center space-x-1.5 px-2.5 py-1 text-xs rounded-md font-medium transition ${
+              activeTab === 'controller'
+                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+            }`}
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Screen</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('packages')}
+            className={`flex items-center space-x-1.5 px-2.5 py-1 text-xs rounded-md font-medium transition ${
+              activeTab === 'packages'
+                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+            }`}
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span>Packages</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('system')}
+            className={`flex items-center space-x-1.5 px-2.5 py-1 text-xs rounded-md font-medium transition ${
+              activeTab === 'system'
+                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            <span>System</span>
+          </button>
+        </div>
       </div>
 
       {/* Action Controls */}

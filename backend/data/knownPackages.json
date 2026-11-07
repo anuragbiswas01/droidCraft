@@ -1,0 +1,508 @@
+{
+  "packages": {
+    "android": {
+      "label": "Android System",
+      "description": "Core Android framework and system resources. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.systemui": {
+      "label": "System UI",
+      "description": "Status bar, navigation bar, lock screen and notification shade. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.settings": {
+      "label": "Settings",
+      "description": "System Settings and device preferences. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.phone": {
+      "label": "Phone Service",
+      "description": "Core telephony stack and radio interface service. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.packageinstaller": {
+      "label": "Package Installer",
+      "description": "Android application installer and permission controller. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.defcontainer": {
+      "label": "Default Container Service",
+      "description": "Package parsing, verification and asset inspection daemon. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.keychain": {
+      "label": "Key Chain",
+      "description": "System security certificates and cryptographic keystore. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.certinstaller": {
+      "label": "Certificate Installer",
+      "description": "Security certificate installer for Wi-Fi and VPN credentials. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.shell": {
+      "label": "Android Shell",
+      "description": "ADB and system terminal execution shell. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.inputmethod.latin": {
+      "label": "Android Keyboard (AOSP)",
+      "description": "Default virtual keyboard input method. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.android.location.fused": {
+      "label": "Fused Location Provider",
+      "description": "Hardware location aggregator for GPS, Wi-Fi, and cellular networks. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.mediatek": {
+      "label": "MediaTek Framework Core",
+      "description": "MediaTek core system provider and HAL hooks. Removal blocked.",
+      "safety": "essential"
+    },
+    "eu.chainfire.supersu": {
+      "label": "SuperSU",
+      "description": "Superuser root permission manager. Removal blocked.",
+      "safety": "essential"
+    },
+    "kingoroot.supersu": {
+      "label": "Kingo SuperUser",
+      "description": "Root permission manager. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.topjohnwu.magisk": {
+      "label": "Magisk",
+      "description": "Magisk root permission and module manager. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.koushikdutta.superuser": {
+      "label": "ClockworkMod Superuser",
+      "description": "Root permission manager. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.noshufou.android.su": {
+      "label": "Superuser (ChainsDD)",
+      "description": "Root permission manager. Removal blocked.",
+      "safety": "essential"
+    },
+    "com.google.android.gms": {
+      "label": "Google Play Services",
+      "description": "Core Google background services. Removing breaks Google sign-in, Play Store, and apps using Play APIs. Must sideload apps afterwards.",
+      "safety": "caution",
+      "group": "google-core"
+    },
+    "com.google.android.gsf": {
+      "label": "Google Services Framework",
+      "description": "Cloud messaging and background infrastructure for Google services.",
+      "safety": "caution",
+      "group": "google-core"
+    },
+    "com.google.android.gsf.login": {
+      "label": "Google Account Manager",
+      "description": "Google authentication & account login manager.",
+      "safety": "caution",
+      "group": "google-core"
+    },
+    "com.android.vending": {
+      "label": "Google Play Store",
+      "description": "Google app store client. Removing requires sideloading apps from then on.",
+      "safety": "caution",
+      "group": "google-core"
+    },
+    "com.android.calendar": {
+      "label": "Calendar",
+      "description": "Stock calendar application.",
+      "safety": "safe",
+      "group": "calendar"
+    },
+    "com.android.providers.calendar": {
+      "label": "Calendar Provider",
+      "description": "Protected database provider for calendar appointments. Removal blocked.",
+      "safety": "essential",
+      "group": "calendar"
+    },
+    "com.mediatek.calendarimporter": {
+      "label": "MTK Calendar Importer",
+      "description": "MediaTek calendar event importer.",
+      "safety": "safe",
+      "group": "calendar"
+    },
+    "com.mediatek.todos": {
+      "label": "MTK ToDo",
+      "description": "MediaTek task and todo list manager.",
+      "safety": "safe",
+      "group": "calendar"
+    },
+    "com.google.android.syncadapters.calendar": {
+      "label": "Google Calendar Sync",
+      "description": "Synchronizes calendar events with Google account.",
+      "safety": "safe",
+      "group": "calendar"
+    },
+    "com.sprd.caldav_sync": {
+      "label": "Spreadtrum CalDAV Sync",
+      "description": "Spreadtrum CalDAV calendar synchronizer.",
+      "safety": "safe",
+      "group": "calendar"
+    },
+    "com.android.email": {
+      "label": "Email",
+      "description": "Stock AOSP email client.",
+      "safety": "safe",
+      "group": "mail"
+    },
+    "com.android.exchange": {
+      "label": "Exchange Services",
+      "description": "Microsoft Exchange ActiveSync mail & calendar service.",
+      "safety": "safe",
+      "group": "mail"
+    },
+    "com.android.mms": {
+      "label": "Messaging (SMS/MMS)",
+      "description": "Stock text messaging. Removing means no SMS or OTP authentication codes.",
+      "safety": "caution",
+      "group": "sms"
+    },
+    "com.mediatek.omacp": {
+      "label": "MTK OMA Client Provisioning",
+      "description": "Carrier SMS/MMS configuration provisioning helper.",
+      "safety": "safe",
+      "group": "sms"
+    },
+    "com.android.stk": {
+      "label": "SIM Toolkit",
+      "description": "Carrier SIM application toolkit.",
+      "safety": "caution",
+      "group": "sim-toolkit"
+    },
+    "com.android.stk1": {
+      "label": "SIM 1 Toolkit",
+      "description": "Dual SIM slot 1 carrier service menu.",
+      "safety": "caution",
+      "group": "sim-toolkit"
+    },
+    "com.mediatek.StkSelection": {
+      "label": "MTK SIM Toolkit Selection",
+      "description": "SIM selection prompt for dual SIM toolkit operations.",
+      "safety": "caution",
+      "group": "sim-toolkit"
+    },
+    "com.google.android.syncadapters.contacts": {
+      "label": "Google Contacts Sync",
+      "description": "Synchronizes contacts with Google account.",
+      "safety": "safe",
+      "group": "contacts-sync"
+    },
+    "com.sprd.carddav_sync": {
+      "label": "Spreadtrum CardDAV Sync",
+      "description": "Spreadtrum CardDAV contact synchronization adapter.",
+      "safety": "safe",
+      "group": "contacts-sync"
+    },
+    "com.google.android.setupwizard": {
+      "label": "Google Setup Wizard",
+      "description": "Out-of-box initial setup wizard. Only remove if device_provisioned and user_setup_complete are both 1.",
+      "safety": "caution",
+      "group": "setup-wizard"
+    },
+    "com.android.provision": {
+      "label": "AOSP Device Provisioning",
+      "description": "Initial setup provisioning flag. Only remove if device is already provisioned.",
+      "safety": "caution",
+      "group": "setup-wizard"
+    },
+    "com.google.android.gm": {
+      "label": "Gmail",
+      "description": "Google Mail client.",
+      "safety": "safe"
+    },
+    "com.google.android.apps.maps": {
+      "label": "Google Maps",
+      "description": "Google Maps and navigation app.",
+      "safety": "safe"
+    },
+    "com.google.android.apps.uploader": {
+      "label": "Google Apps Uploader",
+      "description": "Legacy media uploader for Google services.",
+      "safety": "safe"
+    },
+    "com.google.android.feedback": {
+      "label": "Google Feedback",
+      "description": "Crash reporting and user feedback collector.",
+      "safety": "safe"
+    },
+    "com.google.android.backup": {
+      "label": "Google Backup",
+      "description": "Google cloud backup service.",
+      "safety": "safe"
+    },
+    "com.google.android.backuptransport": {
+      "label": "Google Backup Transport",
+      "description": "Cloud backup transport backend.",
+      "safety": "safe"
+    },
+    "com.google.android.partnersetup": {
+      "label": "Google Partner Setup",
+      "description": "OEM partner configuration helper.",
+      "safety": "safe"
+    },
+    "com.google.android.onetimeinitializer": {
+      "label": "Google One Time Initializer",
+      "description": "Initial configuration runner for Google apps on first boot.",
+      "safety": "safe"
+    },
+    "com.google.android.configupdater": {
+      "label": "Google Config Updater",
+      "description": "Background configuration updater for certificates and timezones.",
+      "safety": "safe"
+    },
+    "com.google.android.marvin.talkback": {
+      "label": "Google TalkBack",
+      "description": "Spoken feedback accessibility service. Safe to remove unless needed.",
+      "safety": "safe"
+    },
+    "com.google.android.tts": {
+      "label": "Google Text-to-Speech",
+      "description": "Google speech synthesizer engine.",
+      "safety": "safe"
+    },
+    "com.redbend.dmClient": {
+      "label": "Red Bend OTA Client",
+      "description": "Firmware Over-The-Air carrier client. Recommended to remove on rooted phones.",
+      "safety": "safe"
+    },
+    "com.android.micromaxregist": {
+      "label": "Micromax Registration",
+      "description": "Micromax OEM device registration app.",
+      "safety": "safe"
+    },
+    "com.android.quicksearchbox": {
+      "label": "Quick Search Box",
+      "description": "Stock home-screen search bar widget.",
+      "safety": "safe"
+    },
+    "com.android.music": {
+      "label": "AOSP Music",
+      "description": "Stock audio music player.",
+      "safety": "safe"
+    },
+    "com.android.musicfx": {
+      "label": "MusicFX",
+      "description": "Audio effects and equalizer control.",
+      "safety": "safe"
+    },
+    "com.android.gallery3d": {
+      "label": "Gallery",
+      "description": "Stock photo and video gallery viewer.",
+      "safety": "safe"
+    },
+    "com.android.soundrecorder": {
+      "label": "Sound Recorder",
+      "description": "Voice and microphone recording tool.",
+      "safety": "safe"
+    },
+    "com.mediatek.videoplayer": {
+      "label": "MTK Video Player",
+      "description": "MediaTek video playback player.",
+      "safety": "safe"
+    },
+    "com.mediatek.FMRadio": {
+      "label": "MTK FM Radio",
+      "description": "MediaTek FM radio tuner.",
+      "safety": "safe"
+    },
+    "com.thunderst.radio": {
+      "label": "FM Radio Player",
+      "description": "Hardware FM radio receiver app.",
+      "safety": "safe"
+    },
+    "com.android.deskclock": {
+      "label": "Clock",
+      "description": "Stock clock and timer. Removing removes alarm functionality.",
+      "safety": "safe"
+    },
+    "com.android.calculator2": {
+      "label": "Calculator",
+      "description": "Stock standard calculator.",
+      "safety": "safe"
+    },
+    "com.android.protips": {
+      "label": "Home Screen Tips",
+      "description": "Introductory tutorial tips widget.",
+      "safety": "safe"
+    },
+    "com.mediatek.weather": {
+      "label": "MTK Weather",
+      "description": "MediaTek weather forecast app.",
+      "safety": "safe"
+    },
+    "com.mediatek.appwidget.weather": {
+      "label": "MTK Weather Widget",
+      "description": "Home screen weather widget.",
+      "safety": "safe"
+    },
+    "com.tinnomobile.tnclockwidget": {
+      "label": "Tinno Clock Widget",
+      "description": "Home screen analog/digital clock widget.",
+      "safety": "safe"
+    },
+    "com.mediatek.mtklogger": {
+      "label": "MTK Logger",
+      "description": "MediaTek logging and debug capture tool.",
+      "safety": "safe"
+    },
+    "com.mediatek.apst.target": {
+      "label": "MTK APST Target",
+      "description": "MediaTek PC Suite communications helper daemon.",
+      "safety": "safe"
+    },
+    "com.android.bluetooth": {
+      "label": "Bluetooth Stack",
+      "description": "Core Bluetooth wireless stack. Removing can cause crash loops; prefer disabling.",
+      "safety": "caution"
+    },
+    "com.mediatek.bluetooth": {
+      "label": "MTK Bluetooth",
+      "description": "MediaTek proprietary Bluetooth extensions. Prefer disabling.",
+      "safety": "caution"
+    },
+    "com.spreadtrum.sgps": {
+      "label": "Spreadtrum SGPS",
+      "description": "Spreadtrum GPS satellite helper. Removing can crash location services; prefer disabling.",
+      "safety": "caution"
+    },
+    "com.mediatek.engineermode": {
+      "label": "MTK Engineer Mode",
+      "description": "MediaTek hardware diagnostic and baseband engineering tool.",
+      "safety": "caution"
+    },
+    "com.sprd.engineermode": {
+      "label": "Spreadtrum Engineer Mode",
+      "description": "Spreadtrum hardware diagnosis and engineering test menu.",
+      "safety": "caution"
+    },
+    "com.sprd.validationtools": {
+      "label": "Spreadtrum Validation Tools",
+      "description": "Factory hardware sensor validation and calibration tests.",
+      "safety": "caution"
+    },
+    "com.android.dialer": {
+      "label": "Phone Dialer",
+      "description": "Voice call phone dialer. Remove only if the device will never make or receive calls.",
+      "safety": "caution"
+    },
+    "com.android.contacts": {
+      "label": "Contacts",
+      "description": "Contacts and address book storage interface.",
+      "safety": "caution"
+    },
+    "com.android.providers.telephony": {
+      "label": "Telephony Provider",
+      "description": "Cellular APN, telephony database, and SIM carrier configuration storage.",
+      "safety": "caution"
+    },
+    "com.android.simmelock": {
+      "label": "SIM Me Lock",
+      "description": "Carrier network subsidy SIM locking service.",
+      "safety": "caution"
+    },
+    "com.mediatek.CellConnService": {
+      "label": "Cell Connection Service",
+      "description": "MediaTek cellular connection service.",
+      "safety": "caution"
+    }
+  },
+  "patterns": [
+    {
+      "pattern": "^com\\.android\\.providers\\..*",
+      "label": "Android System Provider",
+      "description": "Protected Android system content provider. Removal blocked.",
+      "safety": "essential"
+    },
+    {
+      "pattern": ".*\\.launcher.*|.*\\.home.*",
+      "label": "Launcher / Home Screen",
+      "description": "Home screen launcher activity. If active launcher, removal is blocked.",
+      "safety": "caution"
+    },
+    {
+      "pattern": ".*\\.inputmethod.*|.*\\.ime.*",
+      "label": "Keyboard / IME",
+      "description": "Virtual input method editor. If active keyboard, removal is blocked.",
+      "safety": "caution"
+    }
+  ],
+  "dependencyGroups": {
+    "google-core": {
+      "name": "Google Core Services",
+      "packages": [
+        "com.google.android.gms",
+        "com.google.android.gsf",
+        "com.google.android.gsf.login",
+        "com.android.vending"
+      ],
+      "rule": "remove-all-or-none",
+      "description": "Removing only part of the Google Core suite causes persistent Google Play crash loops. Remove all 4 or none."
+    },
+    "calendar": {
+      "name": "Calendar Suite",
+      "packages": [
+        "com.android.calendar",
+        "com.android.providers.calendar",
+        "com.mediatek.calendarimporter",
+        "com.mediatek.todos",
+        "com.google.android.syncadapters.calendar",
+        "com.sprd.caldav_sync"
+      ],
+      "rule": "remove-apps-only",
+      "description": "com.android.providers.calendar is a protected system provider and cannot be removed. Only calendar applications and sync adapters may be removed."
+    },
+    "mail": {
+      "name": "Exchange & Mail",
+      "packages": [
+        "com.android.email",
+        "com.android.exchange"
+      ],
+      "rule": "group",
+      "description": "Exchange ActiveSync depends on the stock Email client."
+    },
+    "sms": {
+      "name": "SMS & OMA Messaging",
+      "packages": [
+        "com.android.mms",
+        "com.mediatek.omacp"
+      ],
+      "rule": "group",
+      "description": "MediaTek OMA client provisioning is tied directly to MMS."
+    },
+    "sim-toolkit": {
+      "name": "SIM Toolkit Suite",
+      "packages": [
+        "com.android.stk",
+        "com.android.stk1",
+        "com.mediatek.StkSelection"
+      ],
+      "rule": "group",
+      "description": "Dual-SIM carrier toolkit applications and selection dialog."
+    },
+    "contacts-sync": {
+      "name": "Contacts Sync Adapters",
+      "packages": [
+        "com.google.android.syncadapters.contacts",
+        "com.sprd.carddav_sync"
+      ],
+      "rule": "group",
+      "description": "Cloud and CardDAV contact synchronization adapters."
+    },
+    "setup-wizard": {
+      "name": "Setup Wizard",
+      "packages": [
+        "com.google.android.setupwizard",
+        "com.android.provision"
+      ],
+      "rule": "check-provisioning",
+      "description": "Setup wizard must only be removed if device_provisioned and user_setup_complete are both 1."
+    }
+  }
+}
+

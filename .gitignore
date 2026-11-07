@@ -3,7 +3,12 @@ node_modules/
 
 # Local Database data
 backend/data/*.json
+backend/data/*.jsonl
 !backend/data/.gitkeep
+!backend/data/knownPackages.json
+
+# Host Backups
+backups/
 
 # Logs
 logs/

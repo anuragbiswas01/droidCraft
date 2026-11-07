@@ -16,7 +16,9 @@ import {
   X,
   Monitor,
   Play,
-  Square as StopSquare
+  Square as StopSquare,
+  Package,
+  Cpu
 } from 'lucide-react';
 
 export default function QuickSettingsSheet({ isOpen, onClose }) {
@@ -25,7 +27,8 @@ export default function QuickSettingsSheet({ isOpen, onClose }) {
     deviceInfo, 
     scrcpySession, 
     launchScrcpy, 
-    stopScrcpy 
+    stopScrcpy,
+    setActiveTab
   } = useDevice();
 
   const [textInput, setTextInput] = useState('');
@@ -63,6 +66,31 @@ export default function QuickSettingsSheet({ isOpen, onClose }) {
             className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
           >
             <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Feature Navigation Link Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => {
+              setActiveTab('packages');
+              onClose();
+            }}
+            className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-medium border border-zinc-200 dark:border-zinc-700 transition"
+          >
+            <Package className="w-4 h-4 text-indigo-500" />
+            <span>Package Manager</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('system');
+              onClose();
+            }}
+            className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-medium border border-zinc-200 dark:border-zinc-700 transition"
+          >
+            <Cpu className="w-4 h-4 text-emerald-500" />
+            <span>System & RAM</span>
           </button>
         </div>
 

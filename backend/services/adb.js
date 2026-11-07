@@ -10,6 +10,8 @@ class AdbService {
     this.lastScreenshots = new Map();
     this.deviceInfoCache = new Map();
     this.deviceResolutions = new Map();
+    this.rootFormCache = new Map();
+    this.capabilitiesCache = new Map();
   }
 
   getAdbPath() {
@@ -23,24 +25,281 @@ class AdbService {
 
   /**
    * Safe execution wrapper using child_process.execFile (No raw shell string injection)
+   * Automatically strips \r from Windows ADB output and enforces high buffer limits.
    */
   async execAdb(args, options = {}) {
     const adbPath = this.getAdbPath();
     const timeout = options.timeout || 10000;
+    const maxBuffer = options.maxBuffer || 20 * 1024 * 1024;
+    const encoding = options.encoding || 'utf8';
 
     return new Promise((resolve, reject) => {
-      execFile(adbPath, args, { timeout, windowsHide: true }, (error, stdout, stderr) => {
+      execFile(adbPath, args, { timeout, windowsHide: true, maxBuffer, encoding }, (error, stdout, stderr) => {
+        const clean = (val) => {
+          if (!val) return '';
+          if (typeof val === 'string') {
+            return val.replace(/\r/g, '');
+          }
+          return val;
+        };
+
         if (error) {
-          error.stdout = stdout ? stdout.toString() : '';
-          error.stderr = stderr ? stderr.toString() : '';
+          error.stdout = clean(stdout);
+          error.stderr = clean(stderr);
           return reject(error);
         }
         resolve({
-          stdout: stdout ? stdout.toString() : '',
-          stderr: stderr ? stderr.toString() : ''
+          stdout: clean(stdout),
+          stderr: clean(stderr)
         });
       });
     });
+  }
+
+  /**
+   * Run command as root, automatically detecting and remembering su syntax
+   * (su -c "<cmd>" vs su 0 sh -c "<cmd>")
+   */
+  async runAsRoot(serial, cmd, options = {}) {
+    const timeout = options.timeout || 15000;
+    const cachedForm = this.rootFormCache.get(serial);
+
+    const tryForm1 = async () => {
+      return await this.execAdb(['-s', serial, 'shell', 'su', '-c', cmd], { timeout });
+    };
+
+    const tryForm2 = async () => {
+      return await this.execAdb(['-s', serial, 'shell', 'su', '0', 'sh', '-c', cmd], { timeout });
+    };
+
+    if (cachedForm === 'su_0_sh_c') {
+      try {
+        const res = await tryForm2();
+        return res;
+      } catch (err2) {
+        const res1 = await tryForm1();
+        this.rootFormCache.set(serial, 'su_c');
+        return res1;
+      }
+    } else {
+      try {
+        const res = await tryForm1();
+        this.rootFormCache.set(serial, 'su_c');
+        return res;
+      } catch (err1) {
+        try {
+          const res2 = await tryForm2();
+          this.rootFormCache.set(serial, 'su_0_sh_c');
+          return res2;
+        } catch (err2) {
+          throw err1;
+        }
+      }
+    }
+  }
+
+  /**
+   * Check if root is available and verified (uid=0)
+   */
+  async isRootAvailable(serial) {
+    try {
+      const res = await this.runAsRoot(serial, 'id', { timeout: 8000 });
+      return res.stdout.includes('uid=0');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  parseSizeToBytes(str, blksize = 1024) {
+    if (!str) return 0;
+    const match = str.trim().match(/^([\d.]+)\s*([KMGTkmgt])?$/);
+    if (!match) return 0;
+    const num = parseFloat(match[1]);
+    const unit = (match[2] || '').toUpperCase();
+    if (unit === 'K') return Math.round(num * 1024);
+    if (unit === 'M') return Math.round(num * 1024 * 1024);
+    if (unit === 'G') return Math.round(num * 1024 * 1024 * 1024);
+    if (unit === 'T') return Math.round(num * 1024 * 1024 * 1024 * 1024);
+    return Math.round(num * blksize);
+  }
+
+  /**
+   * Parse df output for /system, /data, /sdcard
+   */
+  async getDf(serial) {
+    try {
+      const { stdout } = await this.execAdb(['-s', serial, 'shell', 'df'], { timeout: 10000 });
+      const lines = stdout.split('\n');
+      const partitions = {};
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('Filesystem') || trimmed.includes('Permission denied')) continue;
+        const parts = trimmed.split(/\s+/);
+        if (parts.length < 4) continue;
+
+        const fsName = parts[0];
+        const sizeStr = parts[1];
+        const usedStr = parts[2];
+        const freeStr = parts[3];
+        const mountPoint = parts[parts.length - 1];
+
+        let matchedTarget = null;
+        let resolvedMount = fsName;
+        if (fsName === '/system' || mountPoint === '/system') {
+          matchedTarget = 'system';
+          resolvedMount = '/system';
+        } else if (fsName === '/data' || mountPoint === '/data') {
+          matchedTarget = 'data';
+          resolvedMount = '/data';
+        } else if (fsName === '/sdcard' || mountPoint === '/sdcard' || mountPoint === '/storage/sdcard0' || mountPoint === '/storage/emulated/0' || fsName === '/storage/sdcard0') {
+          if (!partitions.sdcard) {
+            matchedTarget = 'sdcard';
+            resolvedMount = '/sdcard';
+          }
+        }
+
+        if (matchedTarget) {
+          const blksize = parts[4] && /^\d+$/.test(parts[4]) ? parseInt(parts[4], 10) : 1024;
+          const sizeBytes = this.parseSizeToBytes(sizeStr, blksize);
+          const usedBytes = this.parseSizeToBytes(usedStr, blksize);
+          const freeBytes = this.parseSizeToBytes(freeStr, blksize);
+
+          partitions[matchedTarget] = {
+            filesystem: fsName,
+            mountPoint: resolvedMount,
+            sizeBytes,
+            usedBytes,
+            freeBytes,
+            sizeText: sizeStr,
+            usedText: usedStr,
+            freeText: freeStr
+          };
+        }
+      }
+
+      return partitions;
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  /**
+   * Dynamically detect active launcher package
+   */
+  async resolveActiveLauncher(serial) {
+    try {
+      try {
+        const { stdout } = await this.execAdb([
+          '-s', serial, 'shell', 'cmd', 'package', 'resolve-activity',
+          '--brief', 'android.intent.action.MAIN', '-c', 'android.intent.category.HOME'
+        ], { timeout: 5000 });
+        const lines = stdout.split('\n').map(l => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          if (line.includes('/')) {
+            const pkg = line.split('/')[0].trim();
+            if (pkg && pkg !== 'android') return pkg;
+          }
+        }
+      } catch (_) {}
+
+      const { stdout: dumpOut } = await this.execAdb([
+        '-s', serial, 'shell', 'dumpsys', 'activity'
+      ], { timeout: 8000 });
+      const match = dumpOut.match(/cat=\[android\.intent\.category\.HOME\][^\n]*cmp=([a-zA-Z0-9_.]+)\//i);
+      if (match && match[1]) {
+        return match[1];
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  /**
+   * Dynamically detect active virtual keyboard
+   */
+  async resolveActiveIme(serial) {
+    try {
+      const { stdout } = await this.execAdb([
+        '-s', serial, 'shell', 'settings', 'get', 'secure', 'default_input_method'
+      ], { timeout: 5000 });
+      const trimmed = stdout.trim();
+      if (trimmed && trimmed.includes('/')) {
+        return trimmed.split('/')[0].trim();
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /**
+   * Device capability detection (cached per serial)
+   */
+  async getDeviceCapabilities(serial, forceRefresh = false) {
+    if (!forceRefresh && this.capabilitiesCache.has(serial)) {
+      return this.capabilitiesCache.get(serial);
+    }
+
+    try {
+      const { stdout: relOut } = await this.execAdb(['-s', serial, 'shell', 'getprop', 'ro.build.version.release']);
+      const { stdout: sdkOut } = await this.execAdb(['-s', serial, 'shell', 'getprop', 'ro.build.version.sdk']);
+      const { stdout: abiOut } = await this.execAdb(['-s', serial, 'shell', 'getprop', 'ro.product.cpu.abi']);
+      const { stdout: modelOut } = await this.execAdb(['-s', serial, 'shell', 'getprop', 'ro.product.model']);
+
+      const androidVersion = relOut.trim() || 'Unknown';
+      const apiLevel = parseInt(sdkOut.trim(), 10) || 17;
+      const cpuAbi = abiOut.trim() || 'Unknown';
+      const model = modelOut.trim() || 'Android Device';
+
+      const rootAvailable = await this.isRootAvailable(serial);
+
+      let provisioned = 'unknown';
+      let setupComplete = 'unknown';
+
+      try {
+        const { stdout: provOut } = await this.execAdb(['-s', serial, 'shell', 'settings', 'get', 'global', 'device_provisioned'], { timeout: 4000 });
+        const val = provOut.trim();
+        if (val === '1' || val === '0') provisioned = val;
+      } catch (_) {}
+
+      try {
+        const { stdout: setupOut } = await this.execAdb(['-s', serial, 'shell', 'settings', 'get', 'secure', 'user_setup_complete'], { timeout: 4000 });
+        const val = setupOut.trim();
+        if (val === '1' || val === '0') setupComplete = val;
+      } catch (_) {}
+
+      const freeSpace = await this.getDf(serial);
+      const activeLauncher = await this.resolveActiveLauncher(serial);
+      const activeIme = await this.resolveActiveIme(serial);
+
+      const caps = {
+        serial,
+        androidVersion,
+        apiLevel,
+        cpuAbi,
+        model,
+        rootAvailable,
+        rootForm: this.rootFormCache.get(serial) || (rootAvailable ? 'su_c' : null),
+        provisioned,
+        setupComplete,
+        freeSpace,
+        activeLauncher,
+        activeIme,
+        updatedAt: Date.now()
+      };
+
+      this.capabilitiesCache.set(serial, caps);
+      return caps;
+    } catch (err) {
+      throw new Error(`Failed to query device capabilities for ${serial}: ${err.message}`);
+    }
+  }
+
+  clearCapabilitiesCache(serial) {
+    if (serial) {
+      this.capabilitiesCache.delete(serial);
+    } else {
+      this.capabilitiesCache.clear();
+    }
   }
 
   /**
@@ -430,6 +689,11 @@ class AdbService {
       case 'backspace':
         await this.execAdb(['-s', serial, 'shell', 'input', 'keyevent', '67']);
         return { success: true, action: 'backspace' };
+
+      case 'reboot':
+        await this.execAdb(['-s', serial, 'reboot']);
+        db.addLog({ type: 'warn', serial, message: 'Device reboot initiated' });
+        return { success: true, action: 'reboot' };
 
       default:
         throw new Error(`Unsupported action "${action}".`);
