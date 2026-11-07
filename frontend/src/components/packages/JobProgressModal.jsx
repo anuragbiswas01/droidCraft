@@ -242,13 +242,14 @@ export default function JobProgressModal({
                     <span className="text-zinc-500 select-none text-[10px]">
                       {ev.timestamp ? new Date(ev.timestamp).toLocaleTimeString() : ''}
                     </span>
-                    <span className={`shrink-0 ${
-                      ev.status === 'done' ? 'text-emerald-400' :
-                      ev.status === 'failed' ? 'text-red-400' :
-                      ev.status === 'skipped' ? 'text-zinc-500' :
-                      'text-indigo-400'
-                    }`}>
-                      {ev.status === 'done' ? '✔' : ev.status === 'failed' ? '✖' : '●'}
+                    <span className="shrink-0 mt-0.5">
+                      {ev.status === 'done' ? (
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400 inline" />
+                      ) : ev.status === 'failed' ? (
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-400 inline" />
+                      ) : (
+                        <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin inline" />
+                      )}
                     </span>
                     <span className="break-all flex-1 text-zinc-200">
                       {ev.message || ev.step}

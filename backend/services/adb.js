@@ -681,6 +681,29 @@ class AdbService {
         db.addLog({ type: 'info', serial, message: 'Volume Down' });
         return { success: true, action: 'volume_down' };
 
+      case 'volume': {
+        const level = Number(actionData.level);
+        const volIndex = Math.max(0, Math.min(15, Math.round(((isNaN(level) ? 80 : level) / 100) * 15)));
+        try {
+          await this.execAdb(['-s', serial, 'shell', 'media', 'volume', '--set', String(volIndex)]);
+        } catch (_) {
+          try {
+            await this.execAdb(['-s', serial, 'shell', 'cmd', 'media_session', 'volume', '--set', String(volIndex)]);
+          } catch (_) {}
+        }
+        return { success: true, action: 'volume', level };
+      }
+
+      case 'shell': {
+        const cmd = String(actionData.command || '');
+        if (cmd) {
+          try {
+            await this.execAdb(['-s', serial, 'shell', cmd]);
+          } catch (_) {}
+        }
+        return { success: true, action: 'shell' };
+      }
+
       case 'enter':
         await this.execAdb(['-s', serial, 'shell', 'input', 'keyevent', '66']);
         db.addLog({ type: 'info', serial, message: 'Enter (Keyevent 66)' });

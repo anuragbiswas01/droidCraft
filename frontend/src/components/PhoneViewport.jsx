@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useDevice } from '../context/DeviceContext';
-import { Smartphone, AlertTriangle, Monitor, Play } from 'lucide-react';
+import { Smartphone, AlertTriangle, Monitor, Play, X } from 'lucide-react';
 
 export default function PhoneViewport({ onOpenQuickSettings }) {
   const { 
@@ -162,7 +162,7 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
       direction = e.deltaX > 0 ? 'right' : 'left';
     }
 
-    setScrollHud(`Scroll ${direction === 'down' ? '↓' : direction === 'up' ? '↑' : direction === 'left' ? '←' : '→'}`);
+    setScrollHud(`Scroll ${direction.charAt(0).toUpperCase() + direction.slice(1)}`);
     setTimeout(() => setScrollHud(null), 600);
 
     scrollDebounceRef.current = setTimeout(() => {
@@ -183,7 +183,9 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
         <div className="absolute top-3 z-30 flex items-center space-x-2 text-xs bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 px-3 py-1.5 rounded-md shadow-sm">
           <AlertTriangle className="w-3.5 h-3.5" />
           <span>{errorBanner}</span>
-          <button onClick={() => setErrorBanner(null)} className="ml-2 font-mono hover:underline">✕</button>
+          <button onClick={() => setErrorBanner(null)} className="ml-2 p-0.5 rounded hover:bg-amber-200 dark:hover:bg-amber-900 transition text-amber-800 dark:text-amber-200">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 

@@ -11,7 +11,7 @@ export function DeviceProvider({ children }) {
   const [scrcpyVersion, setScrcpyVersion] = useState(null);
   const [scrcpySession, setScrcpySession] = useState(null);
   const [mode, setMode] = useState('auto'); // 'auto', 'scrcpy', 'legacy'
-  const [activeTab, setActiveTab] = useState('controller'); // 'controller' | 'packages'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'mirror' | 'apps' | 'system' | 'deck' | 'settings'
   const [capabilities, setCapabilities] = useState(null);
 
   const [isPolling, setIsPolling] = useState(true);

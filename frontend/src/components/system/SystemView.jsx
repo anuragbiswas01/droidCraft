@@ -32,16 +32,16 @@ export default function SystemView() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* Top Bar: Device Info Banner & Subtabs */}
-      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+      <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center space-x-3">
           {/* Device Model & Root status */}
           <div className="flex items-center space-x-2">
-            <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+            <span className="font-semibold text-sm text-[var(--text-primary)]">
               {capabilities?.model || 'Android Device'}
             </span>
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)]">
               Android {capabilities?.release || '?'} (API {capabilities?.sdk || '?'})
             </span>
             {capabilities?.rootAvailable ? (
@@ -59,25 +59,25 @@ export default function SystemView() {
         </div>
 
         {/* Subtabs Switcher */}
-        <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-xs font-medium">
+        <div className="flex items-center space-x-1 bg-[var(--bg-surface-subtle)] p-1 rounded-2xl border border-[var(--border-subtle)] text-xs font-medium">
           <button
             onClick={() => setSubTab('memory')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md transition ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl transition ${
               subTab === 'memory'
-                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Cpu className="w-3.5 h-3.5 text-indigo-500" />
+            <Cpu className="w-3.5 h-3.5 text-[var(--accent-color)]" />
             <span>Memory & RAM</span>
           </button>
 
           <button
             onClick={() => setSubTab('processes')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md transition ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl transition ${
               subTab === 'processes'
-                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             <Terminal className="w-3.5 h-3.5 text-emerald-500" />

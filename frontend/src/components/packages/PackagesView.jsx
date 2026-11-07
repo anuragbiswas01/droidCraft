@@ -271,41 +271,51 @@ export default function PackagesView() {
   const sysFree = capabilities?.freeSpace?.system?.freeText;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 overflow-hidden select-none">
+    <div className="flex-1 flex flex-col h-full bg-[var(--bg-base)] text-[var(--text-primary)] overflow-hidden select-none">
       {/* Top Header Bar */}
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
+      <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+          <div className="p-2.5 rounded-2xl bg-[var(--bg-surface-subtle)] text-[var(--accent-color)]">
             <Package className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 tracking-tight">
+              <h2 className="font-semibold text-sm text-[var(--text-primary)] tracking-tight">
                 ADB Package Manager
               </h2>
               {/* Root Status Badge */}
-              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border flex items-center space-x-1 ${
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border flex items-center space-x-1.5 ${
                 isRooted 
                   ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-300 dark:border-zinc-700'
+                  : 'bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
               }`}>
-                <span>{isRooted ? '● Root Available' : '○ Non-Rooted'}</span>
+                {isRooted ? (
+                  <>
+                    <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Root Available</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert className="w-3 h-3 text-zinc-400" />
+                    <span>Non-Rooted</span>
+                  </>
+                )}
               </span>
             </div>
-            <div className="flex items-center space-x-2 text-[11px] text-zinc-500 mt-0.5">
+            <div className="flex items-center space-x-2 text-[11px] text-[var(--text-secondary)] mt-0.5">
               <span>{capabilities?.model || 'Device'}</span>
               <span>•</span>
               <span>Android {capabilities?.androidVersion || '4.x'}</span>
               {dataFree && (
                 <>
                   <span>•</span>
-                  <span>/data free: <strong className="font-mono text-zinc-700 dark:text-zinc-300">{dataFree}</strong></span>
+                  <span>/data free: <strong className="font-mono text-[var(--text-primary)]">{dataFree}</strong></span>
                 </>
               )}
               {sysFree && (
                 <>
                   <span>•</span>
-                  <span>/system free: <strong className="font-mono text-zinc-700 dark:text-zinc-300">{sysFree}</strong></span>
+                  <span>/system free: <strong className="font-mono text-[var(--text-primary)]">{sysFree}</strong></span>
                 </>
               )}
             </div>
@@ -315,13 +325,13 @@ export default function PackagesView() {
         {/* Rescan & Navigation Tabs */}
         <div className="flex items-center space-x-2">
           {/* Subtabs Switcher */}
-          <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium">
+          <div className="flex items-center p-1 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-xs font-medium">
             <button
               onClick={() => setSubTab('packages')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-md transition ${
+              className={`flex items-center space-x-1 px-3 py-1 rounded-xl transition ${
                 subTab === 'packages'
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Package className="w-3.5 h-3.5" />
@@ -329,10 +339,10 @@ export default function PackagesView() {
             </button>
             <button
               onClick={() => setSubTab('backups')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-md transition ${
+              className={`flex items-center space-x-1 px-3 py-1 rounded-xl transition ${
                 subTab === 'backups'
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Archive className="w-3.5 h-3.5" />
@@ -340,10 +350,10 @@ export default function PackagesView() {
             </button>
             <button
               onClick={() => setSubTab('install')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-md transition ${
+              className={`flex items-center space-x-1 px-3 py-1 rounded-xl transition ${
                 subTab === 'install'
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Upload className="w-3.5 h-3.5" />
@@ -351,10 +361,10 @@ export default function PackagesView() {
             </button>
             <button
               onClick={() => setSubTab('audit')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-md transition ${
+              className={`flex items-center space-x-1 px-3 py-1 rounded-xl transition ${
                 subTab === 'audit'
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />

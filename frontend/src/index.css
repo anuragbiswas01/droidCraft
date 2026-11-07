@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-base: #fcf2f0;
+  --bg-surface: #fff7f6;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-subtle: #fae9e6;
+  --border-subtle: #f3deda;
+  --text-primary: #3d2320;
+  --text-secondary: #8a6560;
+  --accent-color: #b8493d;
+  --accent-fg: #ffffff;
+}
+
 @layer base {
   html, body, #root {
     height: 100%;
@@ -11,9 +23,62 @@
   }
 
   body {
-    @apply bg-zinc-50 text-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+/* Glassmorphism support */
+.glass-panel {
+  background-color: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Custom squircle card */
+.dc-card {
+  background-color: var(--bg-surface);
+  border-radius: 1.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dc-card-subtle {
+  background-color: var(--bg-surface-subtle);
+  border-radius: 1rem;
+}
+
+/* Custom interactive pill button */
+.dc-btn-accent {
+  background-color: var(--accent-color);
+  color: var(--accent-fg);
+  border-radius: 1rem;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.dc-btn-accent:hover {
+  filter: brightness(1.08);
+}
+.dc-btn-accent:active {
+  transform: scale(0.98);
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 /* Prevent image ghost dragging on phone display */
