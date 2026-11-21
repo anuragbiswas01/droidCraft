@@ -107,7 +107,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
               ))
             ) : (
-              <div className="text-zinc-400 font-mono text-[11px]">http://localhost:3000</div>
+              <div className="text-zinc-400 font-mono text-[11px]">{window.location.origin}</div>
             )}
           </div>
 

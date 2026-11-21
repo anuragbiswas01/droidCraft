@@ -5,7 +5,7 @@ const db = require('../services/db');
 const adb = require('../services/adb');
 const scrcpy = require('../services/scrcpy');
 
-function getNetworkInfo(port = 3000) {
+function getNetworkInfo(port = 4000) {
   const interfaces = os.networkInterfaces();
   const addresses = [];
   for (const [name, netList] of Object.entries(interfaces)) {
@@ -34,7 +34,7 @@ function getNetworkInfo(port = 3000) {
 router.get('/', async (req, res) => {
   try {
     const settings = db.getSettings();
-    const network = getNetworkInfo(parseInt(process.env.PORT || '3000', 10));
+    const network = getNetworkInfo(parseInt(process.env.PORT || '4000', 10));
     const scrcpyCheck = await scrcpy.checkAvailability();
 
     res.json({

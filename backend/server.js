@@ -10,7 +10,7 @@ const adb = require('./services/adb');
 const db = require('./services/db');
 
 const app = express();
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || '4000', 10);
 const host = process.env.HOST || '0.0.0.0';
 
 // Middleware

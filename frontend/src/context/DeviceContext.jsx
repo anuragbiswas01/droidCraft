@@ -88,39 +88,6 @@ export function DeviceProvider({ children }) {
     return null;
   }, [selectedSerial]);
 
-  useEffect(() => {
-    if (!selectedSerial) {
-      setDeviceInfo(null);
-      setScrcpySession(null);
-      setCapabilities(null);
-      return;
-    }
-
-    let isMounted = true;
-    api.getDeviceInfo(selectedSerial)
-      .then(info => {
-        if (!isMounted) return;
-        setDeviceInfo(info);
-        setScrcpySession(info.scrcpySession || null);
-
-        // Auto mode selection: if device is legacy (API < 21), use legacy mode
-        if (info.isLegacy) {
-          setMode('legacy');
-        } else if (scrcpyAvailable) {
-          setMode('auto');
-        }
-        addLog(`Connected to ${info.model || selectedSerial} (Android ${info.androidVersion || 'Legacy'})`, 'success');
-      })
-      .catch(err => {
-        if (!isMounted) return;
-        addLog(`Could not query device info: ${err.message}`, 'warn');
-      });
-
-    refreshCapabilities(false);
-
-    return () => { isMounted = false; };
-  }, [selectedSerial, scrcpyAvailable, addLog, refreshCapabilities]);
-
   // Capture screen frame via legacy ADB
   const captureFrame = useCallback(async () => {
     if (!selectedSerial || isCapturingRef.current) return;
@@ -152,30 +119,6 @@ export function DeviceProvider({ children }) {
       isCapturingRef.current = false;
     }
   }, [selectedSerial]);
-
-  // Screen Polling Loop
-  useEffect(() => {
-    if (!isPolling || !selectedSerial) {
-      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
-      return;
-    }
-
-    let isCancelled = false;
-
-    const poll = async () => {
-      await captureFrame();
-      if (!isCancelled && isPolling) {
-        pollingTimerRef.current = setTimeout(poll, pollingInterval);
-      }
-    };
-
-    poll();
-
-    return () => {
-      isCancelled = true;
-      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
-    };
-  }, [isPolling, pollingInterval, selectedSerial, captureFrame]);
 
   // Send Touch / Key / Text Actions
   const sendAction = useCallback(async (payload, desc = '') => {
@@ -219,6 +162,97 @@ export function DeviceProvider({ children }) {
     }
   }, [selectedSerial, addLog]);
 
+  const focusScrcpy = useCallback(async () => {
+    if (!selectedSerial) return;
+    try {
+      await api.focusScrcpy(selectedSerial);
+      addLog(`Brought scrcpy window to front for ${selectedSerial}`, 'info');
+    } catch (_) {}
+  }, [selectedSerial, addLog]);
+
+  // Query Device Info on selectedSerial change
+  useEffect(() => {
+    if (!selectedSerial) {
+      setDeviceInfo(null);
+      setScrcpySession(null);
+      setCapabilities(null);
+      return;
+    }
+
+    let isMounted = true;
+    api.getDeviceInfo(selectedSerial)
+      .then(info => {
+        if (!isMounted) return;
+        setDeviceInfo(info);
+        setScrcpySession(info.scrcpySession || null);
+
+        // Auto mode selection: if device is legacy (API < 21), use legacy mode; otherwise scrcpy
+        if (info.isLegacy) {
+          setMode('legacy');
+        } else if (scrcpyAvailable) {
+          setMode('scrcpy');
+        }
+        addLog(`Connected to ${info.model || selectedSerial} (Android ${info.androidVersion || 'Legacy'})`, 'success');
+      })
+      .catch(err => {
+        if (!isMounted) return;
+        addLog(`Could not query device info: ${err.message}`, 'warn');
+      });
+
+    refreshCapabilities(false);
+
+    return () => { isMounted = false; };
+  }, [selectedSerial, scrcpyAvailable, addLog, refreshCapabilities]);
+
+  // Auto-launch scrcpy for modern Android devices (API >= 21) when scrcpy is available
+  useEffect(() => {
+    if (!selectedSerial || !deviceInfo || !scrcpyAvailable) return;
+
+    const isModern = !deviceInfo.isLegacy && deviceInfo.apiLevel >= 21;
+    if (isModern && (mode === 'scrcpy' || mode === 'auto')) {
+      if (!scrcpySession?.running) {
+        launchScrcpy().catch(err => {
+          console.warn('Auto-launch scrcpy notice:', err.message);
+        });
+      }
+    }
+  }, [selectedSerial, deviceInfo, scrcpyAvailable, mode, scrcpySession?.running, launchScrcpy]);
+
+  // Capture single initial frame when device connects
+  useEffect(() => {
+    if (selectedSerial) {
+      captureFrame();
+    }
+  }, [selectedSerial, captureFrame]);
+
+  // Screen Polling Loop - only active for legacy Android (API < 21) or when explicitly in 'legacy' mode
+  useEffect(() => {
+    const isModern = deviceInfo && !deviceInfo.isLegacy && deviceInfo.apiLevel >= 21;
+    const isScrcpyActive = (mode === 'scrcpy' || mode === 'auto') && isModern && (scrcpyAvailable || scrcpySession?.running);
+
+    // If modern device using scrcpy, do NOT poll slow screencaps
+    if (isScrcpyActive || !isPolling || !selectedSerial) {
+      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const poll = async () => {
+      await captureFrame();
+      if (!isCancelled && isPolling && !isScrcpyActive) {
+        pollingTimerRef.current = setTimeout(poll, pollingInterval);
+      }
+    };
+
+    poll();
+
+    return () => {
+      isCancelled = true;
+      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
+    };
+  }, [isPolling, pollingInterval, selectedSerial, captureFrame, deviceInfo, mode, scrcpyAvailable, scrcpySession?.running]);
+
   // Initial load
   useEffect(() => {
     refreshDevices();
@@ -256,6 +290,7 @@ export function DeviceProvider({ children }) {
       sendAction,
       launchScrcpy,
       stopScrcpy,
+      focusScrcpy,
       addLog
     }}>
       {children}

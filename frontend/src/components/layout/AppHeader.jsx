@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   RotateCw, 
   Search, 
@@ -17,6 +18,8 @@ import { useDevice } from '../../context/DeviceContext';
 import { useTheme, THEME_PRESETS, ACCENT_COLORS } from '../../context/ThemeContext';
 
 export default function AppHeader({ onToggleCommands, onToggleTimeline }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { 
     devices, 
     selectedSerial, 
@@ -50,6 +53,17 @@ export default function AppHeader({ onToggleCommands, onToggleTimeline }) {
     settings: 'Settings'
   };
 
+  const getPageTitle = () => {
+    const p = location.pathname;
+    if (p === '/' || p === '/home') return 'Home';
+    if (p.startsWith('/mirror') || p.startsWith('/controller')) return 'Screen Mirroring';
+    if (p.startsWith('/apps') || p.startsWith('/packages')) return 'Apps & Packages';
+    if (p.startsWith('/system')) return 'System & Diagnostics';
+    if (p.startsWith('/deck')) return 'Hardware Deck';
+    if (p.startsWith('/settings')) return 'Settings';
+    return titleMap[activeTab] || 'Home';
+  };
+
   const handleToggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -65,7 +79,7 @@ export default function AppHeader({ onToggleCommands, onToggleTimeline }) {
       {/* Left: View Title & Device Chip */}
       <div className="flex items-center space-x-3">
         <h1 className="text-lg md:text-xl font-bold tracking-tight text-[var(--text-primary)]">
-          {titleMap[activeTab] || 'Home'}
+          {getPageTitle()}
         </h1>
 
         {/* Device Picker Pill */}
@@ -114,7 +128,7 @@ export default function AppHeader({ onToggleCommands, onToggleTimeline }) {
 
         {/* Timeline Button */}
         <button
-          onClick={onToggleTimeline}
+          onClick={onToggleTimeline || (() => navigate('/system'))}
           className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs shadow-2xs transition"
           title="Recent Activity Timeline"
         >

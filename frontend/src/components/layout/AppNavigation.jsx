@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   Smartphone, 
@@ -7,24 +8,38 @@ import {
   Sliders, 
   Settings, 
   Plus, 
-  Infinity as InfinityIcon,
-  MessageSquare,
-  Phone,
-  Image as ImageIcon
+  Infinity as InfinityIcon
 } from 'lucide-react';
 import { useDevice } from '../../context/DeviceContext';
 
 export default function AppNavigation() {
-  const { activeTab, setActiveTab } = useDevice();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { setActiveTab } = useDevice();
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'mirror', label: 'Screen', icon: Smartphone },
-    { id: 'apps', label: 'Apps', icon: LayoutGrid },
-    { id: 'system', label: 'System', icon: Cpu },
-    { id: 'deck', label: 'Deck', icon: Sliders },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'home', path: '/', label: 'Home', icon: Home },
+    { id: 'mirror', path: '/mirror', label: 'Screen', icon: Smartphone },
+    { id: 'apps', path: '/apps', label: 'Apps', icon: LayoutGrid },
+    { id: 'system', path: '/system', label: 'System', icon: Cpu },
+    { id: 'deck', path: '/deck', label: 'Deck', icon: Sliders },
+    { id: 'settings', path: '/settings', label: 'Settings', icon: Settings },
   ];
+
+  const isNavActive = (item) => {
+    if (item.path === '/') {
+      return location.pathname === '/' || location.pathname === '/home';
+    }
+    return location.pathname === item.path ||
+      location.pathname.startsWith(item.path + '/') ||
+      (item.id === 'mirror' && location.pathname.startsWith('/controller')) ||
+      (item.id === 'apps' && location.pathname.startsWith('/packages'));
+  };
+
+  const handleNavigate = (item) => {
+    navigate(item.path);
+    setActiveTab(item.id);
+  };
 
   return (
     <>
@@ -33,7 +48,7 @@ export default function AppNavigation() {
         {/* Brand Logo Button */}
         <div className="flex flex-col items-center space-y-4">
           <button 
-            onClick={() => setActiveTab('home')}
+            onClick={() => handleNavigate(navItems[0])}
             className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xs transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: 'var(--accent-color)' }}
             title="DroidCraft Home"
@@ -45,14 +60,12 @@ export default function AppNavigation() {
           <nav className="flex flex-col items-center space-y-1.5 pt-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id || 
-                (item.id === 'mirror' && activeTab === 'controller') ||
-                (item.id === 'apps' && activeTab === 'packages');
+              const isActive = isNavActive(item);
 
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleNavigate(item)}
                   className={`w-16 py-2 px-1 flex flex-col items-center justify-center rounded-2xl text-[11px] font-medium transition-all duration-200 group relative ${
                     isActive
                       ? 'shadow-xs'
@@ -88,7 +101,7 @@ export default function AppNavigation() {
 
         {/* Bottom Quick Action Plus Button */}
         <button
-          onClick={() => setActiveTab('settings')}
+          onClick={() => handleNavigate(navItems[5])}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] shadow-xs transition-transform hover:scale-105 active:scale-95"
           title="Customize & Add"
         >
@@ -100,14 +113,12 @@ export default function AppNavigation() {
       <nav className="md:hidden fixed bottom-3 left-4 right-4 z-40 h-14 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xl backdrop-blur-xl flex items-center justify-around px-2 select-none">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id || 
-            (item.id === 'mirror' && activeTab === 'controller') ||
-            (item.id === 'apps' && activeTab === 'packages');
+          const isActive = isNavActive(item);
 
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavigate(item)}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 isActive
                   ? 'text-white shadow-xs'
@@ -124,4 +135,3 @@ export default function AppNavigation() {
     </>
   );
 }
-

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useDevice } from '../context/DeviceContext';
-import { Smartphone, AlertTriangle, Monitor, Play, X } from 'lucide-react';
+import { Smartphone, AlertTriangle, Monitor, Play, X, RotateCw, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export default function PhoneViewport({ onOpenQuickSettings }) {
   const { 
@@ -10,6 +10,12 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
     sendAction, 
     scrcpySession, 
     launchScrcpy,
+    stopScrcpy,
+    focusScrcpy,
+    mode,
+    setMode,
+    scrcpyAvailable,
+    scrcpyVersion,
     errorBanner,
     setErrorBanner
   } = useDevice();
@@ -189,13 +195,28 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
         </div>
       )}
 
-      {/* Scrcpy Status Pill if active */}
-      {scrcpySession?.running && (
-        <div className="absolute top-3 z-20 flex items-center space-x-2 text-xs bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-full shadow-sm">
-          <Monitor className="w-3.5 h-3.5 text-emerald-500" />
-          <span>scrcpy window active on desktop</span>
-        </div>
-      )}
+      {/* Scrcpy / Legacy Mode Header Switcher */}
+      <div className="absolute top-3 z-30 flex items-center space-x-2">
+        {scrcpySession?.running ? (
+          <div className="flex items-center space-x-2 text-xs bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-3 py-1.5 rounded-full shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <Monitor className="w-3.5 h-3.5 text-emerald-500" />
+            <span className="font-semibold">scrcpy 60 FPS Mirror Active</span>
+            <button
+              onClick={() => focusScrcpy()}
+              className="ml-1 text-[11px] underline font-bold hover:text-emerald-600"
+              title="Bring scrcpy window to front"
+            >
+              Focus Window
+            </button>
+          </div>
+        ) : deviceInfo && !deviceInfo.isLegacy && scrcpyAvailable ? (
+          <div className="flex items-center space-x-1.5 text-xs bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-3 py-1 rounded-full shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Modern Android {deviceInfo.androidVersion} (API {deviceInfo.apiLevel})</span>
+          </div>
+        ) : null}
+      </div>
 
       {/* Screen Container: Fullscreen on mobile, framed on desktop */}
       <div 
@@ -203,7 +224,66 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
         className="relative w-full h-[100dvh] md:h-full max-h-[88vh] md:max-w-md flex items-center justify-center bg-black md:bg-zinc-900 md:rounded-2xl md:border md:border-zinc-800 md:shadow-lg overflow-hidden"
         onWheel={handleWheel}
       >
-        {screenBlobUrl ? (
+        {scrcpySession?.running ? (
+          /* Scrcpy Cockpit Surface */
+          <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden">
+            {/* Background Dimmed Frame if available */}
+            {screenBlobUrl && (
+              <img
+                src={screenBlobUrl}
+                alt=""
+                className="absolute inset-0 w-full h-full object-contain opacity-25 blur-xs pointer-events-none"
+              />
+            )}
+
+            <div className="relative z-10 p-6 rounded-3xl bg-zinc-900/90 border border-zinc-700/80 shadow-2xl max-w-sm w-full space-y-4 backdrop-blur-md">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                  Hardware Stream Running
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  {deviceInfo?.model || selectedSerial}
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Android {deviceInfo?.androidVersion} • 60 FPS Low Latency
+                </p>
+                <p className="text-[11px] font-mono text-zinc-500 mt-1">
+                  PID: {scrcpySession.pid} • Title: DroidCraft - {selectedSerial}
+                </p>
+              </div>
+
+              <div className="flex flex-col space-y-2 pt-2">
+                <button
+                  onClick={() => focusScrcpy()}
+                  className="w-full py-2.5 px-4 rounded-xl text-white font-semibold text-xs transition shadow-xs flex items-center justify-center space-x-2 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: 'var(--accent-color)' }}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Bring Window to Front</span>
+                </button>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => launchScrcpy()}
+                    className="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition"
+                  >
+                    Restart
+                  </button>
+                  <button
+                    onClick={() => stopScrcpy()}
+                    className="px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-semibold transition"
+                  >
+                    Stop
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : screenBlobUrl ? (
           <div 
             className="relative w-full h-full flex items-center justify-center cursor-crosshair touch-none select-none"
             onPointerDown={handlePointerDown}
@@ -277,7 +357,7 @@ export default function PhoneViewport({ onOpenQuickSettings }) {
                 className="mt-2 flex items-center space-x-1.5 text-xs bg-zinc-800 text-zinc-200 px-3 py-1.5 rounded border border-zinc-700 hover:bg-zinc-700 transition"
               >
                 <Play className="w-3.5 h-3.5" />
-                <span>Launch scrcpy</span>
+                <span>Launch scrcpy 60 FPS Mirror</span>
               </button>
             )}
           </div>

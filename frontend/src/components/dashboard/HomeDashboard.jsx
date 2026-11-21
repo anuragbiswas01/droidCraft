@@ -37,8 +37,10 @@ import {
 } from 'lucide-react';
 import { useDevice } from '../../context/DeviceContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomeDashboard() {
+  const navigate = useNavigate();
   const { 
     selectedSerial, 
     capabilities, 
@@ -173,7 +175,10 @@ export default function HomeDashboard() {
                 </div>
 
                 <button
-                  onClick={() => setActiveTab('mirror')}
+                  onClick={() => {
+                    setActiveTab('mirror');
+                    navigate('/mirror');
+                  }}
                   className="text-sm font-semibold inline-flex items-center space-x-1.5 hover:underline pt-2 text-[var(--accent-color)]"
                 >
                   <span>Open Screen</span>
@@ -269,7 +274,10 @@ export default function HomeDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
             {/* 1. Mirror Screen */}
             <button
-              onClick={() => setActiveTab('mirror')}
+              onClick={() => {
+                setActiveTab('mirror');
+                navigate('/mirror');
+              }}
               className="dc-card p-4 md:p-5 flex flex-col justify-between hover:scale-[1.02] active:scale-[0.98] transition group text-left cursor-pointer shadow-xs min-h-[110px] md:min-h-[125px]"
             >
               <div className="flex justify-between items-center">
@@ -289,7 +297,10 @@ export default function HomeDashboard() {
 
             {/* 2. Send Files */}
             <button
-              onClick={() => setActiveTab('apps')}
+              onClick={() => {
+                setActiveTab('apps');
+                navigate('/apps');
+              }}
               className="dc-card p-4 md:p-5 flex flex-col justify-between hover:scale-[1.02] active:scale-[0.98] transition group text-left cursor-pointer shadow-xs min-h-[110px] md:min-h-[125px]"
             >
               <div className="flex justify-between items-center">
@@ -579,7 +590,10 @@ export default function HomeDashboard() {
             <div className="flex items-center justify-between pb-1">
               <span className="font-bold text-base md:text-lg text-[var(--text-primary)]">Timeline</span>
               <button 
-                onClick={() => setActiveTab('system')}
+                onClick={() => {
+                  setActiveTab('system');
+                  navigate('/system');
+                }}
                 className="text-xs md:text-sm font-bold hover:underline text-[var(--accent-color)]"
               >
                 View all

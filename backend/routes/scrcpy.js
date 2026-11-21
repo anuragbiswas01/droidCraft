@@ -74,4 +74,22 @@ router.post('/stop', (req, res) => {
   }
 });
 
+/**
+ * POST /api/scrcpy/focus
+ * Brings the native scrcpy mirror window to the foreground
+ */
+router.post('/focus', (req, res) => {
+  try {
+    const { serial } = req.body;
+    if (!serial) {
+      return res.status(400).json({ error: 'Device serial is required.' });
+    }
+
+    const result = scrcpy.focusWindow(serial);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

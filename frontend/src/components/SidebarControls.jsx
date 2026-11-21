@@ -32,6 +32,7 @@ export default function SidebarControls() {
     scrcpySession, 
     launchScrcpy, 
     stopScrcpy, 
+    focusScrcpy,
     logs,
     selectedSerial
   } = useDevice();
@@ -91,13 +92,22 @@ export default function SidebarControls() {
           </div>
 
           {scrcpySession?.running ? (
-            <button
-              onClick={stopScrcpy}
-              className="w-full flex items-center justify-center space-x-1.5 text-xs bg-red-500/10 text-red-600 dark:text-red-400 py-1.5 rounded-xl hover:bg-red-500/20 transition font-medium"
-            >
-              <StopSquare className="w-3.5 h-3.5" />
-              <span>Stop scrcpy Session</span>
-            </button>
+            <div className="flex space-x-1.5">
+              <button
+                onClick={() => focusScrcpy()}
+                className="flex-1 flex items-center justify-center space-x-1.5 text-xs text-white py-1.5 rounded-xl transition font-medium shadow-xs"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                <span>Focus Window</span>
+              </button>
+              <button
+                onClick={stopScrcpy}
+                className="px-3 flex items-center justify-center text-xs bg-red-500/10 text-red-600 dark:text-red-400 py-1.5 rounded-xl hover:bg-red-500/20 transition font-medium"
+                title="Stop scrcpy Session"
+              >
+                <StopSquare className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => launchScrcpy()}

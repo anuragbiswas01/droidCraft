@@ -72,6 +72,10 @@ export const api = {
     method: 'POST',
     body: JSON.stringify({ serial })
   }),
+  focusScrcpy: (serial) => fetchJson('/api/scrcpy/focus', {
+    method: 'POST',
+    body: JSON.stringify({ serial })
+  }),
 
   // Settings & DB endpoints
   getSettings: () => fetchJson('/api/settings'),

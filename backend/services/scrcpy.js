@@ -99,6 +99,10 @@ class ScrcpyService {
       '--video-bit-rate', String(options.bitrate || settings.scrcpyBitrate || '4M')
     ];
 
+    if (options.alwaysOnTop ?? true) {
+      args.push('--always-on-top');
+    }
+
     if (options.stayAwake ?? settings.scrcpyStayAwake) {
       args.push('--stay-awake');
     }
@@ -219,6 +223,19 @@ class ScrcpyService {
       this.activeSessions.delete(serial);
       return { success: false, error: err.message };
     }
+  }
+
+  /**
+   * Focuses the native scrcpy desktop window for the device
+   */
+  focusWindow(serial) {
+    if (process.platform === 'win32') {
+      const title = `DroidCraft - ${serial}`;
+      const psCmd = `powershell -Command "$w = New-Object -ComObject WScript.Shell; $w.AppActivate('${title}')"`;
+      require('child_process').exec(psCmd, () => {});
+      return { success: true, message: `Focused scrcpy window for ${serial}` };
+    }
+    return { success: false, error: 'Window focus is only supported on Windows' };
   }
 
   /**
